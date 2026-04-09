@@ -16,7 +16,7 @@ export interface UserService {
 	register: (credentials: RegisterCredentials) => Promise<TokenDTO>;
 	generateCode: (
 		email: string,
-	) => Promise<{ message: "SUCCESS" | "INTERNAL_ERROR" }>;
+	) => Promise<{ message: "SUCCESS" | "ALREADY_EXISTS" | "INTERNAL_ERROR" }>;
 	validateCode: (
 		code: string,
 	) => Promise<{ message: "SUCCESS" | "NOT_CORRECT" | "EXPIRED" }>;
@@ -44,13 +44,13 @@ export interface UserController {
 		next: NextFunction,
 	) => void;
 	generateCode: (
-		req: Request<object, { message: string }, { email: string }>,
-		res: Response<{ message: string }>,
+		req: Request<object, { message: "SUCCESS" | "ALREADY_EXISTS" | "INTERNAL_ERROR" }, { email: string }>,
+		res: Response<{ message: "SUCCESS" | "ALREADY_EXISTS" | "INTERNAL_ERROR" }>,
 		next: NextFunction,
 	) => void;
 	validateCode: (
-		req: Request<object, { message: string }, { email: string, code: string }>,
-		res: Response<{ message: string }>,
+		req: Request<object, { message: "SUCCESS" | "NOT_CORRECT" | "EXPIRED" }, { email: string, code: string }>,
+		res: Response<{ message: "SUCCESS" | "NOT_CORRECT" | "EXPIRED" }>,
 		next: NextFunction,
 	) => void;
 	me: (
