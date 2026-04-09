@@ -1,26 +1,33 @@
 import type { UserController as UserControllerContract } from "./types/user.contracts";
 import { UserService } from "./user.service";
-import { AppError } from "@errors/app.errors";
+import { ValidationError } from "@errors/app.errors";
 
 export const UserController: UserControllerContract = {
-	login(req, res, next) {
-		res.status(200).json({ token: "123123123" });
-		console.log("hello world");
+	async login(req, res, next) {
+		const tokenDTO = await UserService.login(req.body);
+		res.status(200).json({ token: tokenDTO.token });
 	},
-	register(req, res, next) {
-		res.status(200).json({ token: "123123123" });
-		console.log("hello world");
+	async register(req, res, next) {
+		const tokenDTO = await UserService.register(req.body);
+		res.status(200).json({ token: tokenDTO.token });
 	},
-	generateCode(req, res, next) {
-		res.status(200).json({ message: "SUCCESS" });
-		console.log("hello world");
+	async generateCode(req, res, next) {
+		if (!req.body) throw new ValidationError("Body is required")
+		if (!req.body.email) throw new ValidationError("Email is required")
+		const response = await UserService.generateCode(req.body.email)
+		
+		res.status(200).json({ message: response.message });
 	},
-	validateCode(req, res, next) {
-		res.status(200).json({ message: "SUCCESS" });
-		console.log("hello world");
+	async validateCode(req, res, next) {
+		if (!req.body) throw new ValidationError("Body is required")
+		if (!req.body.email) throw new ValidationError("Email is required")
+		if (!req.body.code) throw new ValidationError("Code is required")
+		
+		const response = await UserService.validateCode(req.body.code, req.body.email)
+		res.status(200).json({ message: response.message });
 	},
-	me(req, res, next) {
-		res.status(200).json({ id: 1, email: "user@example.com" });
-		console.log("hello world");
+	async me(req, res, next) {
+		const user = await UserService.me({ userId: res.locals.userId });
+		res.status(200).json(user);
 	},
 };

@@ -9,10 +9,6 @@ export const regSchema = yup.object({
 		.string()
 		.required("Password field is required")
 		.min(8, "Password must contain at least 8 characters"),
-	codeDB: yup
-		.string()
-		.required("This field is required")
-		.length(6, "Code must contain 6 numbers"),
 });
 
 export const loginSchema = yup.object({

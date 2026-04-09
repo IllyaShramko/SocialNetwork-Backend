@@ -12,9 +12,9 @@ app.use(cors({
     origin: "*"
 }))
 
+app.use("/", router);
 app.use(logMiddleware);
 app.use(errorMiddleware);
-app.use("/", router);
 app.listen(env.PORT, env.HOST, () => {
     console.log(`Server started on http://${env.HOST}:${env.PORT}`)
 });

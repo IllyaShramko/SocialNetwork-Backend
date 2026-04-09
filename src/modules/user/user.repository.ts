@@ -1,33 +1,68 @@
-import { PrismaClient } from "../../generated/prisma";
+import { PRISMA_CLIENT as Client } from "@config/client";
 import type { UserRepository as RepoContract } from "./types/user.contracts";
 import {
 	AppError,
 	InternalServerError,
 	NotFoundError,
 } from "@errors/app.errors";
-
-const Client = new PrismaClient();
+import { PrismaClientKnownRequestError } from "../../generated/prisma/runtime/client";
+import { PrismaErrorCodes } from "@app-types/error-codes";
 
 export const UserRepository: RepoContract = {
 	async findByEmail(email) {
-		throw new AppError("Function not implemented.", 500);
-	},
-	async findByUsername(username) {
-		throw new AppError("Function not implemented.", 500);
+		const user = await Client.user.findUnique({
+			where: { email: email },
+		});
+		return user;
 	},
 	async findByIdWithPassword(id) {
-		throw new AppError("Function not implemented.", 500);
+		const user = await Client.user.findUnique({
+			where: { id: id },
+		});
+		return user;
 	},
 	async findById(id) {
-		throw new AppError("Function not implemented.", 500);
+		const user = await Client.user.findUnique({
+			where: { id: id },
+			omit: { password: true },
+		});
+		return user;
 	},
-	async createVerificationCode(email) {
-		throw new AppError("Function not implemented.", 500);
+	async createVerificationCode({email, code, expiresAt}) {
+		const codeDB = await Client.verificationCode.create({
+			data: {
+				email,
+				code,
+				expiresAt,
+			}
+		})
+		return codeDB
 	},
 	async findVerificationByCode(code) {
-		throw new AppError("Function not implemented.", 500);
+		const verification = await Client.verificationCode.findUnique({
+			where: { code: code }
+		});
+		return verification;
 	},
 	async create(data) {
-		throw new AppError("Function not implemented.", 500);
+		try {
+			const user = await Client.user.create({
+				data,
+			});
+			return user;
+		} catch (error) {
+			if (error instanceof PrismaClientKnownRequestError) {
+				switch (error.code) {
+					case PrismaErrorCodes.NOT_EXIST:
+						throw new NotFoundError("User");
+					default:
+						throw new InternalServerError();
+				}
+			}
+			if (error instanceof Error) {
+				throw new InternalServerError(error.message);
+			}
+			throw new InternalServerError();
+		}
 	},
 };

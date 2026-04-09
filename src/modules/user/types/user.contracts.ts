@@ -16,18 +16,17 @@ export interface UserService {
 	register: (credentials: RegisterCredentials) => Promise<TokenDTO>;
 	generateCode: (
 		email: string,
-	) => Promise<{ message: "SUCCESS" | "ALREADY_EXISTS" | "INTERNAL_ERROR" }>;
+	) => Promise<{ message: "SUCCESS" | "ALREADY_EXISTS" }>;
 	validateCode: (
-		code: string,
+		code: string, email: string
 	) => Promise<{ message: "SUCCESS" | "NOT_CORRECT" | "EXPIRED" }>;
 	me: (DTO: MeDTO) => Promise<User>;
 }
 export interface UserRepository {
 	findByEmail: (email: string) => Promise<User | null>;
-	findByUsername: (username: string) => Promise<User | null>;
 	findByIdWithPassword: (id: number) => Promise<UserWithPassword | null>;
 	findById: (id: number) => Promise<User | null>;
-	createVerificationCode: (email: string) => Promise<VerificationCode | null>;
+	createVerificationCode: (data: { email: string; code: string; expiresAt: Date; }) => Promise<VerificationCode | null>;
 	findVerificationByCode: (code: string) => Promise<VerificationCode | null>;
 	create: (data: CreateUserPayload) => Promise<User>;
 }
@@ -44,8 +43,8 @@ export interface UserController {
 		next: NextFunction,
 	) => void;
 	generateCode: (
-		req: Request<object, { message: "SUCCESS" | "ALREADY_EXISTS" | "INTERNAL_ERROR" }, { email: string }>,
-		res: Response<{ message: "SUCCESS" | "ALREADY_EXISTS" | "INTERNAL_ERROR" }>,
+		req: Request<object, { message: "SUCCESS" | "ALREADY_EXISTS" }, { email: string }>,
+		res: Response<{ message: "SUCCESS" | "ALREADY_EXISTS" }>,
 		next: NextFunction,
 	) => void;
 	validateCode: (
