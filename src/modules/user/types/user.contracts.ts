@@ -49,7 +49,7 @@ export interface UserController {
 		next: NextFunction,
 	) => void;
 	validateCode: (
-		req: Request<object, { message: string }, { email: string }>,
+		req: Request<object, { message: string }, { email: string, code: string }>,
 		res: Response<{ message: string }>,
 		next: NextFunction,
 	) => void;
