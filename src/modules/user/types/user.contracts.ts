@@ -59,3 +59,4 @@ export interface UserController {
 		next: NextFunction,
 	) => void;
 }
+
