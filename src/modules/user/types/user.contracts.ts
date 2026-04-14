@@ -1,34 +1,52 @@
 import type { NextFunction, Request, Response } from "express";
 import type {
+	CodeType,
 	CreateUserPayload,
 	LoginCredentials,
 	MeDTO,
 	RegisterCredentials,
 	TokenDTO,
+	UpdatePasswordDTO,
 	User,
+	UserProfileDTO,
+	UserUpdate,
 	UserWithPassword,
 	VerificationCode,
+	VerificationCodeCreate,
+	VerificationResult,
 } from "./user.types";
-import { AuthenticatedUser, TokenPayload } from "../../../types/token";
+import { AuthenticatedUser } from "../../../types/token";
 
 export interface UserService {
 	login: (credentials: LoginCredentials) => Promise<TokenDTO>;
 	register: (credentials: RegisterCredentials) => Promise<TokenDTO>;
 	generateCode: (
 		email: string,
-	) => Promise<{ message: "SUCCESS" | "ALREADY_EXISTS" }>;
+		type: CodeType,
+	) => Promise<{ message: "SUCCESS" }>;
 	validateCode: (
-		code: string, email: string
-	) => Promise<{ message: "SUCCESS" | "NOT_CORRECT" | "EXPIRED" }>;
+		code: string,
+		email: string,
+	) => Promise<{ message: VerificationResult }>;
 	me: (DTO: MeDTO) => Promise<User>;
+	updateAvatar: (userId: number, filename: string) => Promise<User>;
+	updateProfile: (userId: number, data: UserProfileDTO) => Promise<User>;
+	updatePassword: (userId: number, newPassword: string) => Promise<User>;
+	updateSignature: (userId: number, filename: string) => Promise<User>;
 }
 export interface UserRepository {
 	findByEmail: (email: string) => Promise<User | null>;
-	findByIdWithPassword: (id: number) => Promise<UserWithPassword | null>;
-	findById: (id: number) => Promise<User | null>;
-	createVerificationCode: (data: { email: string; code: string; expiresAt: Date; }) => Promise<VerificationCode | null>;
-	findVerificationByCode: (code: string) => Promise<VerificationCode | null>;
+	findByIdWithPassword: (id: number) => Promise<UserWithPassword>;
+	findById: (id: number) => Promise<User>;
+	createVerificationCode: (
+		data: VerificationCodeCreate,
+	) => Promise<VerificationCode>;
+	findVerificationByCode: (
+		code: string,
+		email: string,
+	) => Promise<VerificationCode>;
 	create: (data: CreateUserPayload) => Promise<User>;
+	updateProfile: (userId: number, data: UserUpdate) => Promise<User>;
 }
 
 export interface UserController {
@@ -43,18 +61,65 @@ export interface UserController {
 		next: NextFunction,
 	) => void;
 	generateCode: (
-		req: Request<object, { message: "SUCCESS" | "ALREADY_EXISTS" }, { email: string }>,
+		req: Request<
+			object,
+			{ message: "SUCCESS" | "ALREADY_EXISTS" },
+			{ email: string }
+		>,
 		res: Response<{ message: "SUCCESS" | "ALREADY_EXISTS" }>,
 		next: NextFunction,
 	) => void;
 	validateCode: (
-		req: Request<object, { message: "SUCCESS" | "NOT_CORRECT" | "EXPIRED" }, { email: string, code: string }>,
+		req: Request<
+			object,
+			{ message: "SUCCESS" | "NOT_CORRECT" | "EXPIRED" },
+			{ email: string; code: string }
+		>,
 		res: Response<{ message: "SUCCESS" | "NOT_CORRECT" | "EXPIRED" }>,
 		next: NextFunction,
 	) => void;
 	me: (
 		req: Request<object, object, object, object, AuthenticatedUser>,
 		res: Response<User, AuthenticatedUser>,
+		next: NextFunction,
+	) => void;
+
+	updateAvatar: (
+		req: Request<object, object, object, object, AuthenticatedUser>,
+		res: Response<User, AuthenticatedUser>,
+		next: NextFunction,
+	) => void;
+
+	updateProfile: (
+		req: Request<object, object, UserProfileDTO, object, AuthenticatedUser>,
+		res: Response<User, AuthenticatedUser>,
+		next: NextFunction,
+	) => void;
+
+	updatePassword: (
+		req: Request<
+			object,
+			object,
+			UpdatePasswordDTO,
+			object,
+			AuthenticatedUser
+		>,
+		res: Response<User, AuthenticatedUser>,
+		next: NextFunction,
+	) => void;
+
+	updateSignature: (
+		req: Request<object, object, object, object, AuthenticatedUser>,
+		res: Response<User, AuthenticatedUser>,
+		next: NextFunction,
+	) => void;
+	sendVerificationPasswordResetCode: (
+		req: Request<
+			object,
+			{ message: "SUCCESS" | "NOT_EXISTS" },
+			{ email: string }
+		>,
+		res: Response<{ message: "SUCCESS" | "NOT_EXISTS" }>,
 		next: NextFunction,
 	) => void;
 }

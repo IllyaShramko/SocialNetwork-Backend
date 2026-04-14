@@ -1,0 +1,7 @@
+model Image {
+  id        Int     @id @default(autoincrement())
+  filename  String
+  isVisible Boolean
+  album     Album   @relation(fields: [albumId], references: [id])
+  albumId   Int
+}

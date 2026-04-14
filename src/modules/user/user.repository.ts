@@ -1,7 +1,7 @@
 import { PRISMA_CLIENT as Client } from "@config/client";
 import type { UserRepository as RepoContract } from "./types/user.contracts";
 import {
-	AppError,
+	ConflictError,
 	InternalServerError,
 	NotFoundError,
 } from "@errors/app.errors";
@@ -16,33 +16,80 @@ export const UserRepository: RepoContract = {
 		return user;
 	},
 	async findByIdWithPassword(id) {
-		const user = await Client.user.findUnique({
-			where: { id: id },
-		});
-		return user;
+		try {
+			const user = await Client.user.findUniqueOrThrow({
+				where: { id: id },
+			});
+			return user;
+		} catch (error) {
+			if (error instanceof PrismaClientKnownRequestError) {
+				switch (error.code) {
+					case PrismaErrorCodes.NOT_EXIST:
+						throw new NotFoundError("User with id " + id);
+					default:
+						throw new InternalServerError();
+				}
+			}
+			if (error instanceof Error) {
+				throw new InternalServerError(error.message);
+			}
+			throw new InternalServerError();
+		}
 	},
 	async findById(id) {
-		const user = await Client.user.findUnique({
-			where: { id: id },
-			omit: { password: true },
-		});
-		return user;
+		try {
+			const user = await Client.user.findUniqueOrThrow({
+				where: { id: id },
+				omit: { password: true },
+			});
+			return user;
+		} catch (error) {
+			if (error instanceof PrismaClientKnownRequestError) {
+				switch (error.code) {
+					case PrismaErrorCodes.NOT_EXIST:
+						throw new NotFoundError("User with id " + id);
+					default:
+						throw new InternalServerError();
+				}
+			}
+			if (error instanceof Error) {
+				throw new InternalServerError(error.message);
+			}
+			throw new InternalServerError();
+		}
 	},
-	async createVerificationCode({email, code, expiresAt}) {
+	async createVerificationCode({ email, code, expiresAt }) {
 		const codeDB = await Client.verificationCode.create({
 			data: {
 				email,
 				code,
 				expiresAt,
-			}
-		})
-		return codeDB
-	},
-	async findVerificationByCode(code) {
-		const verification = await Client.verificationCode.findUnique({
-			where: { code: code }
+			},
 		});
-		return verification;
+		return codeDB;
+	},
+	async findVerificationByCode(code, email) {
+		try {
+			const verification = await Client.verificationCode.findFirstOrThrow(
+				{
+					where: { AND: [{ code: code }, { email: email }] },
+				},
+			);
+			return verification;
+		} catch (error) {
+			if (error instanceof PrismaClientKnownRequestError) {
+				switch (error.code) {
+					case PrismaErrorCodes.NOT_EXIST:
+						throw new NotFoundError("Verification code");
+					default:
+						throw new InternalServerError();
+				}
+			}
+			if (error instanceof Error) {
+				throw new InternalServerError(error.message);
+			}
+			throw new InternalServerError();
+		}
 	},
 	async create(data) {
 		try {
@@ -53,8 +100,33 @@ export const UserRepository: RepoContract = {
 		} catch (error) {
 			if (error instanceof PrismaClientKnownRequestError) {
 				switch (error.code) {
+					case PrismaErrorCodes.UNIQUE:
+						throw new ConflictError(
+							`User with such data (${data}) already exists`,
+						);
+					default:
+						throw new InternalServerError();
+				}
+			}
+			if (error instanceof Error) {
+				throw new InternalServerError(error.message);
+			}
+			throw new InternalServerError();
+		}
+	},
+	async updateProfile(id, data) {
+		try {
+			const updatedUser = await Client.user.update({
+				where: { id },
+				data,
+				omit: { password: true },
+			});
+			return updatedUser;
+		} catch (error) {
+			if (error instanceof PrismaClientKnownRequestError) {
+				switch (error.code) {
 					case PrismaErrorCodes.NOT_EXIST:
-						throw new NotFoundError("User");
+						throw new NotFoundError("User with id " + id);
 					default:
 						throw new InternalServerError();
 				}

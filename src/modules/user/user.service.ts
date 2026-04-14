@@ -2,7 +2,6 @@ import { transporter } from "@config/mail";
 import { UserService as ServiceContract } from "./types/user.contracts";
 import { UserRepository } from "./user.repository";
 import {
-	AppError,
 	AuthenticationError,
 	ConflictError,
 	InternalServerError,
@@ -17,11 +16,12 @@ export const UserService: ServiceContract = {
 	async login(credentials) {
 		const user = await UserRepository.findByEmail(credentials.email);
 		if (!user) {
-			throw new NotFoundError("User");
+			throw new NotFoundError("User with email " + credentials.email);
 		}
 		const userWithPassword = await UserRepository.findByIdWithPassword(
 			user.id,
 		);
+
 		if (!userWithPassword) {
 			throw new NotFoundError("User");
 		}
@@ -70,42 +70,77 @@ export const UserService: ServiceContract = {
 		);
 		return { token };
 	},
-	async generateCode(email) {
+	async generateCode(email, type) {
 		const user = await UserRepository.findByEmail(email);
-		if (user) {
-			return { message: "ALREADY_EXISTS" };
-		}
-		function generateCode() {
-			let code = "";
-			for (let index = 0; index < 6; index++) {
-				code += `${Math.round(Math.random() * 9)}`;
+
+		if (type === "EMAIL_VERIFICATION") {
+			if (user) {
+				throw new ConflictError(`User with email ${email}`);
 			}
-			return code;
-		}
-		const code = generateCode();
-		const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-		try {
-			await UserRepository.createVerificationCode({
-				email,
-				code,
-				expiresAt,
+			function generateCode() {
+				let code = "";
+				for (let index = 0; index < 6; index++) {
+					code += `${Math.round(Math.random() * 9)}`;
+				}
+				return code;
+			}
+			const code = generateCode();
+			const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+			try {
+				await UserRepository.createVerificationCode({
+					email,
+					code,
+					expiresAt,
+				});
+			} catch (error) {
+				throw new InternalServerError(
+					"Error creating verification code",
+				);
+			}
+			transporter.sendMail({
+				from: "World.IT",
+				to: email,
+				subject: "Confirm code",
+				html: `Hello there! Confirm code to create new account: <b>${code}</b>`,
 			});
-		} catch (error) {
-			throw new InternalServerError("Error creating verification code");
+		} else if (type === "PASSWORD_RESET") {
+			if (!user) {
+				throw new NotFoundError("User with this email");
+			}
+			function generateCode() {
+				let code = "";
+				for (let index = 0; index < 6; index++) {
+					code += `${Math.round(Math.random() * 9)}`;
+				}
+				return code;
+			}
+			const code = generateCode();
+			const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+			try {
+				await UserRepository.createVerificationCode({
+					email,
+					code,
+					expiresAt,
+				});
+			} catch (error) {
+				throw new InternalServerError(
+					"Error creating verification code",
+				);
+			}
+			transporter.sendMail({
+				from: "World.IT",
+				to: email,
+				subject: "Confirm code",
+				html: `Hello there! Confirm code to change password: <b>${code}</b>`,
+			});
 		}
-		transporter.sendMail({
-			from: "World.IT",
-			to: email,
-			subject: "Confirm code",
-			text: `Hello there! Confirm code to create new account: ${code}`,
-		});
 		return { message: "SUCCESS" };
 	},
 	async validateCode(code, email) {
-		const verification = await UserRepository.findVerificationByCode(code);
-		if (!verification) {
-			throw new NotFoundError("Verification code not found");
-		}
+		const verification = await UserRepository.findVerificationByCode(
+			code,
+			email,
+		);
 		if (verification.expiresAt < new Date()) {
 			throw new NotFoundError("Verification code has expired");
 		}
@@ -115,10 +150,31 @@ export const UserService: ServiceContract = {
 		return { message: "SUCCESS" };
 	},
 	async me(DTO) {
-        const user = await UserRepository.findById(DTO.userId);
-        if (!user) {
-            throw new NotFoundError("User");
-        }
-        return user;
+		const user = await UserRepository.findById(DTO.userId);
+		return user;
+	},
+	async updateAvatar(userId, avatarUrl) {
+		const updatedUser = await UserRepository.updateProfile(
+			userId,
+			avatarUrl ? { avatarUrl } : {},
+		);
+		return updatedUser;
+	},
+	async updateProfile(userId, data) {
+		const updatedUser = await UserRepository.updateProfile(userId, data);
+		return updatedUser;
+	},
+	async updatePassword(userId, newPassword) {
+		const hashedPassword = await hash(newPassword, 10);
+		const updatedUser = await UserRepository.updateProfile(userId, {
+			password: hashedPassword,
+		});
+		return updatedUser;
+	},
+	async updateSignature(userId, signature) {
+		const updatedUser = await UserRepository.updateProfile(userId, {
+			signature,
+		});
+		return updatedUser;
 	},
 };

@@ -1,6 +1,6 @@
 model VerificationCode {
-    id Int @id @default(autoincrement())
-    email String @unique
-    code String @unique
-    expiresAt DateTime
+  id        Int      @id @default(autoincrement())
+  email     String
+  code      String
+  expiresAt DateTime
 }

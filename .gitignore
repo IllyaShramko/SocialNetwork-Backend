@@ -3,7 +3,10 @@ package-lock.json
 # 
 .env
 .DS_Store
+!.gitkeep
 # 
-src/generated/prisma
+src/generated/
 *.db
 migrations/
+# 
+media/*
