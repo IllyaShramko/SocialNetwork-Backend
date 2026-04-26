@@ -4,9 +4,11 @@ model User {
   username  String?   @unique
   firstName String?
   surname   String?
-  avatarUrl String?
   birthday  DateTime?
   signature String?
   password  String
   isActive  Boolean   @default(false)
+  albums    Album[]
+  images    Image[]
+  avatars   Avatar[]
 }

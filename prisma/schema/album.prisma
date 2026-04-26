@@ -1,8 +1,10 @@
 model Album {
-  id      Int      @id @default(autoincrement())
+  id      Int     @id @default(autoincrement())
   name    String
-  topic   Tag?     @relation(fields: [topicId], references: [id])
-  topicId Int?
-  date    DateTime
+  topic   Tag     @relation(fields: [topicId], references: [id])
+  topicId Int
+  year    Int
   images  Image[]
+  user    User    @relation(fields: [userId], references: [id])
+  userId  Int
 }

@@ -1,0 +1,7 @@
+model Avatar {
+  id      Int   @id @default(autoincrement())
+  image   Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  imageId Int   @unique
+  user    User  @relation(fields: [userId], references: [id])
+  userId  Int
+}

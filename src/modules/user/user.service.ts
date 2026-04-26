@@ -4,6 +4,7 @@ import { UserRepository } from "./user.repository";
 import {
 	AuthenticationError,
 	ConflictError,
+	ForbiddenError,
 	InternalServerError,
 	NotFoundError,
 } from "@errors/app.errors";
@@ -154,9 +155,9 @@ export const UserService: ServiceContract = {
 		return user;
 	},
 	async updateAvatar(userId, avatarUrl) {
-		const updatedUser = await UserRepository.updateProfile(
+		const updatedUser = await UserRepository.uploadAvatar(
 			userId,
-			avatarUrl ? { avatarUrl } : {},
+			avatarUrl,
 		);
 		return updatedUser;
 	},
@@ -176,5 +177,17 @@ export const UserService: ServiceContract = {
 			signature,
 		});
 		return updatedUser;
+	},
+	async getMyAvatars(userId) {
+		const images = await UserRepository.getAvatarsByUserId(userId);
+		return images;
+	},
+	async deleteAvatar(userId, id) {
+		const avatar = await UserRepository.findAvatarById(id);
+		if (avatar.userId !== userId || avatar.image.userId !== userId) {
+			throw new ForbiddenError(`avatar with id ${avatar.id}`);
+		}
+		const deletedAvatar = await UserRepository.deleteAvatar(avatar.imageId);
+		return deletedAvatar;
 	},
 };

@@ -1,15 +1,13 @@
 import { cleanEnv, str, num } from "envalid";
 import * as dotenv from "dotenv";
 
-
 dotenv.config();
 
-
 export const env = cleanEnv(process.env, {
-    DATABASE_URL: str(),
-    SECRET_KEY: str(),
-    HOST: str({ default: "localhost" }),
-    PORT: num(),
-    HOST_EMAIL_ADDRESS: str(),
-    HOST_EMAIL_PASSWORD: str()
-})
+	DATABASE_URL: str(),
+	SECRET_KEY: str(),
+	HOST: str({ default: "localhost" }),
+	PORT: num(),
+	HOST_EMAIL_ADDRESS: str(),
+	HOST_EMAIL_PASSWORD: str(),
+});

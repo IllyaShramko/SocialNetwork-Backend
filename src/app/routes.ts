@@ -1,10 +1,12 @@
 import { Router } from "express";
-import { UserRouter } from "../modules/user/user.routes"
+import { UserRouter, AlbumRouter } from "../modules";
 
 export const router = Router();
 
 router.get("/health", (req, res) => {
-	res.json({ status: "OK", timestamp: Date.now() });
+	res.json({ status: "OK", timestamp: Date.now().toLocaleString() });
 });
 
 router.use("/users/", UserRouter);
+
+router.use("/album/", AlbumRouter)

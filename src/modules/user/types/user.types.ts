@@ -6,7 +6,21 @@ export type User = Prisma.UserGetPayload<{
 	omit: {
 		password: true;
 	};
+	include: {
+		avatars: {
+			include: {
+				image: true;
+			};
+		};
+	};
 }>;
+
+export type Avatar = Prisma.AvatarGetPayload<{
+	include: {
+		image: true
+	}
+}>
+
 export type VerificationCode = Prisma.VerificationCodeGetPayload<{}>;
 
 export type CreateUserPayload = Prisma.UserUncheckedCreateInput;
@@ -19,17 +33,16 @@ export type RegisterCredentials = InferType<typeof regSchema>;
 
 export interface UserAvatarDTO {}
 
-
 export interface UserProfileDTO {
-    username?: string;
-    firstName?: string;
-    surname?: string;
-    birthday?: Date;
+	username?: string;
+	firstName?: string;
+	surname?: string;
+	birthday?: Date;
 	email?: string;
 }
 
 export interface UpdatePasswordDTO {
-    newPassword: string;
+	newPassword: string;
 }
 
 export interface UpdateSiqnatureDTO {}
@@ -48,3 +61,5 @@ export type VerificationResult = "SUCCESS" | "NOT_CORRECT" | "EXPIRED";
 export type CodeType = "PASSWORD_RESET" | "EMAIL_VERIFICATION";
 
 export type VerificationCodeCreate = Prisma.VerificationCodeCreateInput;
+
+export type Image = Prisma.ImageGetPayload<{}>;

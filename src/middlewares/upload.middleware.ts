@@ -11,34 +11,47 @@ export function processImageMiddleware(
 	size: number,
 	quality: number = 50,
 	isOptional: boolean = false,
+	isMany: boolean = false,
 ) {
 	return async function (req: Request, res: Response, next: NextFunction) {
 		try {
-			const file = req.file;
-			if (!file) {
-				if (isOptional) {
-					next();
-					return;
-				}
-				next(new BadRequestError("File was not loaded"));
-				return;
+			const files = isMany
+				? (req.files as Express.Multer.File[])
+				: req.file
+					? [req.file]
+					: [];
+
+			if (files.length === 0) {
+				if (isOptional) return next();
+				return next(new BadRequestError("Files were not loaded"));
 			}
-			const filename = Date.now() + ".jpeg";
-			const originalFilePath = join(originalDir, filename);
-			const thumbnailFilePath = join(thumbnailDir, filename);
 
-			await sharp(file.buffer)
-				.flatten({ background: { r: 255, g: 255, b: 255 } })
-				.jpeg({ quality: 100 })
-				.toFile(originalFilePath);
+			await Promise.all(
+				files.map(async (file) => {
+					const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}.jpeg`;
+					const originalFilePath = join(originalDir, filename);
+					const thumbnailFilePath = join(thumbnailDir, filename);
 
-			await sharp(file.buffer)
-				.resize({ width: size, height: size })
-				.flatten({ background: { r: 255, g: 255, b: 255 } })
-				.jpeg({ quality })
-				.toFile(thumbnailFilePath);
-				
-			file.filename = filename;
+					const image = sharp(file.buffer);
+
+					await Promise.all([
+						image
+							.clone()
+							.flatten({ background: { r: 255, g: 255, b: 255 } })
+							.jpeg({ quality: 100 })
+							.toFile(originalFilePath),
+						image
+							.clone()
+							.resize({ width: size, height: size, fit: "cover" })
+							.flatten({ background: { r: 255, g: 255, b: 255 } })
+							.jpeg({ quality })
+							.toFile(thumbnailFilePath),
+					]);
+					console.log(filename);
+					file.filename = filename;
+				}),
+			);
+
 			next();
 		} catch (error) {
 			next(error);

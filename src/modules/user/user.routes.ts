@@ -27,7 +27,7 @@ UserRouter.patch(
 	"/me/avatar",
 	authMiddleware,
 	uploadMiddleware.single("avatar"),
-	processImageMiddleware(400, 5),
+	processImageMiddleware(400, 65),
 	UserController.updateAvatar,
 );
 
@@ -50,3 +50,5 @@ UserRouter.post(
 	authMiddleware,
 	UserController.sendVerificationPasswordResetCode,
 );
+UserRouter.get("/me/avatars", authMiddleware, UserController.getAvatars);
+UserRouter.delete("/me/avatars/:id", authMiddleware, UserController.deleteAvatar)

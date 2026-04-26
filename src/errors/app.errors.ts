@@ -32,9 +32,16 @@ export class InternalServerError extends AppError {
 		super(message, 500);
 	}
 }
+
 export class AuthenticationError extends AppError {
 	constructor(message: string = "Unauthenticated Error") {
 		super(message, 401);
+	}
+}
+
+export class ForbiddenError extends AppError {
+	constructor(resourceName: string = "Forbidden Error") {
+		super(`Unable to get access to ${resourceName}`, 403);
 	}
 }
 

@@ -14,8 +14,9 @@ app.use(
 		origin: "",
 	}),
 );
-app.use("/images/", express.static(thumbnailDir));
-app.use("/images_signs/", express.static(originalDir));
+
+app.use("/media/thumb", express.static(thumbnailDir));
+app.use("/media/original", express.static(originalDir));
 
 app.use(logMiddleware);
 app.use("/", router);

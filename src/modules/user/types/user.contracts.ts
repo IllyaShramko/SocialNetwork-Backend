@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import type {
+	Avatar,
 	CodeType,
 	CreateUserPayload,
 	LoginCredentials,
@@ -33,7 +34,13 @@ export interface UserService {
 	updateProfile: (userId: number, data: UserProfileDTO) => Promise<User>;
 	updatePassword: (userId: number, newPassword: string) => Promise<User>;
 	updateSignature: (userId: number, filename: string) => Promise<User>;
+	getMyAvatars: (userId: number) => Promise<Avatar[]>;
+	deleteAvatar: (
+		userId: number,
+		id: number,
+	) => Promise<{ message: "SUCCESS" }>;
 }
+
 export interface UserRepository {
 	findByEmail: (email: string) => Promise<User | null>;
 	findByIdWithPassword: (id: number) => Promise<UserWithPassword>;
@@ -47,6 +54,10 @@ export interface UserRepository {
 	) => Promise<VerificationCode>;
 	create: (data: CreateUserPayload) => Promise<User>;
 	updateProfile: (userId: number, data: UserUpdate) => Promise<User>;
+	getAvatarsByUserId: (userId: number) => Promise<Avatar[]>;
+	uploadAvatar: (userId: number, filename: string) => Promise<User>;
+	deleteAvatar: (id: number) => Promise<{ message: "SUCCESS" }>;
+	findAvatarById: (id: number) => Promise<Avatar>;
 }
 
 export interface UserController {
@@ -113,6 +124,7 @@ export interface UserController {
 		res: Response<User, AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
+
 	sendVerificationPasswordResetCode: (
 		req: Request<
 			object,
@@ -120,6 +132,24 @@ export interface UserController {
 			{ email: string }
 		>,
 		res: Response<{ message: "SUCCESS" | "NOT_EXISTS" }>,
+		next: NextFunction,
+	) => void;
+
+	getAvatars: (
+		req: Request<object, Avatar[], object, object, AuthenticatedUser>,
+		res: Response<Avatar[], AuthenticatedUser>,
+		next: NextFunction,
+	) => void;
+
+	deleteAvatar: (
+		req: Request<
+			{ id: string },
+			{ message: "SUCCESS" },
+			object,
+			object,
+			AuthenticatedUser
+		>,
+		res: Response<{ message: "SUCCESS" }, AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
 }
