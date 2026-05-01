@@ -30,6 +30,7 @@ export const updateUserSchema = yup.object({
 	birthday: yup.date().nullable(),
 	username: yup.string().nullable(),
 });
+
 export const updatePasswordSchema = yup.object({
 	newPassword: yup
 		.string()

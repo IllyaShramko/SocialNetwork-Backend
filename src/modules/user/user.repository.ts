@@ -53,6 +53,9 @@ export const UserRepository: RepoContract = {
 						include: {
 							image: true,
 						},
+						orderBy: {
+							id: "desc",
+						},
 					},
 				},
 			});
