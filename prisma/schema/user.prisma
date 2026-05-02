@@ -11,4 +11,5 @@ model User {
   albums    Album[]
   images    Image[]
   avatars   Avatar[]
+  posts     Post[]
 }
