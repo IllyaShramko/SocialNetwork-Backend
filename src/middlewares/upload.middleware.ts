@@ -42,7 +42,7 @@ export function processImageMiddleware(
 							.toFile(originalFilePath),
 						image
 							.clone()
-							.resize({ width: size, height: size, fit: "cover" })
+							.resize({ width: size, height: size, fit: "inside" })
 							.flatten({ background: { r: 255, g: 255, b: 255 } })
 							.jpeg({ quality })
 							.toFile(thumbnailFilePath),

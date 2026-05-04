@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { UserRouter, AlbumRouter } from "../modules";
+import { UserRouter, AlbumRouter, PostRouter } from "../modules";
 
 export const router = Router();
 
@@ -9,4 +9,6 @@ router.get("/health", (req, res) => {
 
 router.use("/users/", UserRouter);
 
-router.use("/album/", AlbumRouter)
+router.use("/album/", AlbumRouter);
+
+router.use("/posts/", PostRouter);
