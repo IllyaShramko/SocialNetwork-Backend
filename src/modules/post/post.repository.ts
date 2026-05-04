@@ -28,6 +28,9 @@ export const PostRepository: PostRepositoryContract = {
 					},
 				},
 			},
+			orderBy: {
+				id: "desc",
+			},
 		});
 		return posts;
 	},
@@ -53,6 +56,9 @@ export const PostRepository: PostRepositoryContract = {
 						password: true,
 					},
 				},
+			},
+			orderBy: {
+				id: "desc",
 			},
 		});
 		return posts;

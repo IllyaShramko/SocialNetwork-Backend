@@ -2,7 +2,7 @@ import { Prisma } from "../../../generated/prisma";
 
 export type Post = Prisma.PostGetPayload<{}>;
 
-export type PostCreateDto = {
+export type PostCreateDto = {	
 	title: string;
 	topic: string;
 	description: string;
