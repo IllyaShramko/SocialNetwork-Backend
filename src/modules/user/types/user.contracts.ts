@@ -5,7 +5,7 @@ import type {
 	LoginCredentials,
 	MeDTO,
 	Profile,
-	ProfileUpdateDTO,
+	ProfileUpdate,
 	RegisterCredentials,
 	TokenDTO,
 	UpdatePasswordDTO,
@@ -57,8 +57,8 @@ export interface UserRepository {
 	// 	email: string,
 	// ) => Promise<VerificationCode>;
 	create: (data: CreateUserDTO) => Promise<User>;
-	updateUser: (userId: number, data: ProfileUpdateDTO) => Promise<User>;
-	updateProfile: (userId: number, data: UserUpdate) => Promise<User>;
+	updateUser: (userId: number, data: UserUpdate) => Promise<User>;
+	updateProfile: (userId: number, data: ProfileUpdate) => Promise<User>;
 	// getAvatarsByUserId: (userId: number) => Promise<Avatar[]>;
 	// uploadAvatar: (userId: number, filename: string) => Promise<User>;
 	// deleteAvatar: (id: number) => Promise<{ message: "SUCCESS" }>;

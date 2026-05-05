@@ -21,6 +21,37 @@ export type PostCreate = Prisma.PostGetPayload<{
 
 export type PostImage = Prisma.PostImageGetPayload<{}>;
 
+export type PostFullInfoDTO = Prisma.PostGetPayload<{
+	include: {
+		tags: {
+			include: {
+				tag: true;
+			};
+		};
+		links: true;
+		images: true;
+		author: {
+			omit: {
+				password: true;
+			};
+			include: {
+				profile: {
+					select: {
+						pseudonym: true;
+						signature: true;
+						avatar: true;
+						is_image_signature: true;
+						is_text_signature: true;
+					};
+				};
+			};
+		};
+		likes: true;
+		views: true;
+		hearts: true;
+	};
+}>;
+
 export type PostToShow = Prisma.PostGetPayload<{
 	include: {
 		tags: {
@@ -47,7 +78,14 @@ export type PostToShow = Prisma.PostGetPayload<{
 			};
 		};
 	};
-}>;
+}> & {
+	likes: number;
+	hearts: number;
+	views: number;
+	isLiked: boolean;
+	isHearted: boolean;
+	isViewed: boolean;
+};
 
 export type TagPost = Prisma.TagPostGetPayload<{
 	include: {

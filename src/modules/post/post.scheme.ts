@@ -10,7 +10,7 @@ export const postCreateSchema = yup.object({
 	topic: yup
 		.string()
 		.min(2, "Topic must be informative")
-		.required("Topic is required"),
+		.nullable(),
 
 	content: yup
 		.string()

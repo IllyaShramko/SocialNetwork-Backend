@@ -38,6 +38,9 @@ export const PostRepository: PostRepositoryContract = {
 						},
 					},
 				},
+				likes: true,
+				hearts: true,
+				views: true,
 			},
 			orderBy: {
 				id: "desc",
@@ -78,6 +81,9 @@ export const PostRepository: PostRepositoryContract = {
 						},
 					},
 				},
+				likes: true,
+				hearts: true,
+				views: true,
 			},
 			orderBy: {
 				id: "desc",
@@ -131,6 +137,9 @@ export const PostRepository: PostRepositoryContract = {
 							},
 						},
 					},
+					likes: true,
+					hearts: true,
+					views: true,
 				},
 			});
 			return post;

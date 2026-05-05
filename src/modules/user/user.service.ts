@@ -4,7 +4,6 @@ import { UserRepository } from "./user.repository";
 import {
 	AuthenticationError,
 	ConflictError,
-	ForbiddenError,
 	InternalServerError,
 	NotFoundError,
 } from "@errors/app.errors";
@@ -154,13 +153,19 @@ export const UserService: ServiceContract = {
 		return user;
 	},
 	async updateProfile(userId, data) {
-		await UserRepository.updateUser(userId, data);
-		const updatedUser = await UserRepository.updateProfile(userId, data);
+		const { pseudonym, avatar, birthDate, ...userData } = data;
+		console.log(userData);
+		await UserRepository.updateProfile(userId, {
+			pseudonym,
+			avatar,
+			birthDate,
+		});
+		const updatedUser = await UserRepository.updateUser(userId, userData);
 		return updatedUser;
 	},
 	async updatePassword(userId, newPassword) {
 		const hashedPassword = await hash(newPassword, 10);
-		const updatedUser = await UserRepository.updateProfile(userId, {
+		const updatedUser = await UserRepository.updateUser(userId, {
 			password: hashedPassword,
 		});
 		return updatedUser;

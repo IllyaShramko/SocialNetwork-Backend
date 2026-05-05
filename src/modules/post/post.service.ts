@@ -1,7 +1,7 @@
 import { UserRepository } from "../user/user.repository";
 import { PostRepository } from "./post.repository";
 import type { PostServiceContract } from "./types/post.contracts";
-import { PostCreate } from "./types/post.types";
+import { PostCreate, PostToShow } from "./types/post.types";
 
 export const PostService: PostServiceContract = {
 	async createPost(data, userId) {
@@ -21,18 +21,57 @@ export const PostService: PostServiceContract = {
 			tagsId,
 			links,
 		);
-		return post;
+		const { hearts, likes, views, ...cleanPost } = post;
+
+		const finalPost: PostToShow = {
+			...cleanPost,
+			views: views.length,
+			hearts: hearts.length,
+			likes: likes.length,
+			isViewed: views.some((view) => view.userId === userId),
+			isHearted: hearts.some((view) => view.userId === userId),
+			isLiked: likes.some((view) => view.userId === userId),
+		};
+		return finalPost;
 	},
-	async getAllPosts(page, postsPerPage) {
+	async getAllPosts(page, postsPerPage, userId) {
 		const posts = await PostRepository.getAllPosts(
 			page * postsPerPage,
 			postsPerPage,
 		);
-		return posts;
+		const cleanPosts = posts.map((post) => {
+			const { hearts, likes, views, ...cleanPost } = post;
+
+			const finalPost: PostToShow = {
+				...cleanPost,
+				views: views.length,
+				hearts: hearts.length,
+				likes: likes.length,
+				isViewed: views.some((view) => view.userId === userId),
+				isHearted: hearts.some((view) => view.userId === userId),
+				isLiked: likes.some((view) => view.userId === userId),
+			};
+			return finalPost;
+		});
+		return cleanPosts;
 	},
 	async getUserPosts(userId) {
 		const posts = await PostRepository.getUserPosts(userId);
-		return posts;
+		const cleanPosts = posts.map((post) => {
+			const { hearts, likes, views, ...cleanPost } = post;
+
+			const finalPost: PostToShow = {
+				...cleanPost,
+				views: views.length,
+				hearts: hearts.length,
+				likes: likes.length,
+				isViewed: views.some((view) => view.userId === userId),
+				isHearted: hearts.some((view) => view.userId === userId),
+				isLiked: likes.some((view) => view.userId === userId),
+			};
+			return finalPost;
+		});
+		return cleanPosts;
 	},
 	async getAllTags() {
 		return PostRepository.getAllTags();

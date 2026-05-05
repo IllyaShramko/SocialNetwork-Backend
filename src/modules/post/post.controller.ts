@@ -26,6 +26,7 @@ export const PostController: PostControllerContract = {
 			const posts = await PostService.getAllPosts(
 				+req.params.pageNumber,
 				5,
+				res.locals.userId,
 			);
 			res.status(200).json(posts);
 		} catch (error) {

@@ -11,7 +11,7 @@ export type User = Prisma.UserGetPayload<{
 	};
 }>;
 
-export type Profile = Prisma.ProfileGetPayload<{}>
+export type Profile = Prisma.ProfileGetPayload<{}>;
 // export type VerificationCode = Prisma.VerificationCodeGetPayload<{}>;
 
 export interface CreateUserDTO {
@@ -25,20 +25,22 @@ export type LoginCredentials = InferType<typeof loginSchema>;
 
 export type RegisterCredentials = InferType<typeof regSchema>;
 
+export type UserUpdateDTO = Prisma.UserGetPayload<{
+	select: {
+		username: true;
+		firstName: true;
+		lastName: true;
+		email: true;
+	};
+}>;
 
-export interface UserUpdateDTO {
-	username?: string;
-	firstName?: string;
-	lastName?: string;
-	email?: string;
-}
+export type ProfileUpdateDTO = Prisma.ProfileGetPayload<{
+	select: { birthDate: true; avatar: true; pseudonym: true; signature: true };
+}>;
 
-export interface ProfileUpdateDTO {
-	birthDate?: Date;
-	avatar?: string;
-}
+export type ProfileUpdate = Prisma.ProfileUncheckedUpdateInput
 
-export type UserAndProfileUpdateDTO = UserUpdateDTO & ProfileUpdateDTO
+export type UserAndProfileUpdateDTO = UserUpdateDTO & ProfileUpdateDTO;
 
 export interface UpdatePasswordDTO {
 	newPassword: string;

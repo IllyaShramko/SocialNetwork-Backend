@@ -1,5 +1,5 @@
 import { AuthenticatedUser } from "@app-types/token";
-import type { PostCreate, PostCreateDto, PostToShow, Tag } from "./post.types";
+import type { PostCreate, PostCreateDto, PostFullInfoDTO, PostToShow, Tag } from "./post.types";
 import type { Request, Response, NextFunction } from "express";
 
 export type PostRepositoryContract = {
@@ -8,11 +8,11 @@ export type PostRepositoryContract = {
 		images: string[],
 		tagIds: number[],
 		links: string[],
-	) => Promise<PostToShow>;
+	) => Promise<PostFullInfoDTO>;
 	//
-	getUserPosts: (userId: number) => Promise<PostToShow[]>;
+	getUserPosts: (userId: number) => Promise<PostFullInfoDTO[]>;
 
-	getAllPosts: (skip?: number, take?: number) => Promise<PostToShow[]>;
+	getAllPosts: (skip?: number, take?: number) => Promise<PostFullInfoDTO[]>;
 
 	getAllTags: () => Promise<Tag[]>;
 };
@@ -22,7 +22,7 @@ export type PostServiceContract = {
 
 	getUserPosts: (userId: number) => Promise<PostToShow[]>;
 
-	getAllPosts: (page: number, postsPerPage: number) => Promise<PostToShow[]>;
+	getAllPosts: (page: number, postsPerPage: number, userId: number) => Promise<PostToShow[]>;
 
 	getAllTags: () => Promise<Tag[]>;
 };
