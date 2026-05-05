@@ -1,0 +1,26 @@
+model User {
+  id                Int                @id @default(autoincrement())
+  email             String             @unique
+  username          String?            @unique
+  firstName         String?            @map("first_name")
+  lastName          String?            @map("last_name")
+  signature         String?
+  dateJoined        DateTime           @default(now()) @map("date_joined")
+  lastLogin         DateTime           @default(now()) @map("last_login")
+  password          String
+  isSuperuser       Boolean            @default(false) @map("is_superuser")
+  isStaff           Boolean            @default(false) @map("is_staff")
+  isActive          Boolean            @default(false) @map("is_active")
+  profile           Profile?
+  messages          Message[]
+  chats             ChatUser[]
+  chatsAdmin        Chat[]
+  posts             Post[]
+  messageReaders    MessageReader[]
+  postHearts        PostHeart[]
+  postLikes         PostLike[]
+  postViews         PostView[]
+  verificationCodes VerificationCode[]
+
+  @@map("user_app_user")
+}

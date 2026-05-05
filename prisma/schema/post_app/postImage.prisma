@@ -1,0 +1,9 @@
+model PostImage {
+  id             Int    @id @default(autoincrement())
+  originalImage  String @map("original_image")
+  comressedImage String @map("comressed_image")
+  post           Post   @relation(fields: [postId], references: [id])
+  postId         Int    @map("post_id")
+
+  @@map("post_app_postimage")
+}

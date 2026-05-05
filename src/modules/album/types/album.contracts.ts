@@ -2,10 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import {
 	Album,
 	CreateAlbum,
-	Image,
-	ImageCreate,
-	ImageWithAlbum,
-	Tag,
+	CreateImageCheckedPayload,
+	ImagePayload,
+	ImageWithAlbumAndProfileWithUserId,
 	UpdateAlbum,
 	UploadImagesCredentials,
 } from "./album.types";
@@ -19,11 +18,17 @@ export interface AlbumService {
 		id: number,
 	) => Promise<Album>;
 	deleteAlbum: (userId: number, id: number) => Promise<Album>;
-	getTags: () => Promise<Tag[]>;
 	getMyAlbums: (userId: number) => Promise<Album[]>;
-	uploadImages: (albumId: number, userId: number, filenames: string[]) => Promise<Image[]>;
-	changeImageVisibility: (id: number, userId: number) => Promise<Image>;
-	deleteImage: (id: number, userId: number) => Promise<Image>;
+	uploadImages: (
+		albumId: number,
+		userId: number,
+		filenames: string[],
+	) => Promise<ImagePayload[]>;
+	changeImageVisibility: (
+		id: number,
+		userId: number,
+	) => Promise<ImagePayload>;
+	deleteImage: (id: number, userId: number) => Promise<ImagePayload>;
 }
 
 export interface AlbumRepository {
@@ -31,12 +36,14 @@ export interface AlbumRepository {
 	createAlbum: (data: CreateAlbum) => Promise<Album>;
 	updateAlbum: (id: number, data: UpdateAlbum) => Promise<Album>;
 	deleteAlbum: (id: number) => Promise<Album>;
-	getTags: () => Promise<Tag[]>;
-	getAlbumsByUserId: (userId: number) => Promise<Album[]>;
-	uploadImage: (data: ImageCreate) => Promise<Image>;
-	findImageById: (id: number) => Promise<ImageWithAlbum>;
-	changeImageVisibility: (id: number, visibility: boolean) => Promise<Image>;
-	deleteImage: (id: number) => Promise<Image>;
+	getAlbumsByProfileId: (profileId: number) => Promise<Album[]>;
+	uploadImage: (data: CreateImageCheckedPayload) => Promise<ImagePayload>;
+	findImageById: (id: number) => Promise<ImageWithAlbumAndProfileWithUserId>;
+	changeImageVisibility: (
+		id: number,
+		visibility: boolean,
+	) => Promise<ImagePayload>;
+	deleteImage: (id: number) => Promise<ImagePayload>;
 }
 
 export interface AlbumController {
@@ -66,44 +73,39 @@ export interface AlbumController {
 		res: Response<Album[], AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
-	getTags: (
-		req: Request<object, Tag[]>,
-		res: Response<Tag[]>,
-		next: NextFunction,
-	) => void;
 	uploadImages: (
 		req: Request<
 			{ id: string },
-			Image[],
+			ImagePayload[],
 			UploadImagesCredentials,
 			object,
 			AuthenticatedUser
 		>,
-		res: Response<Image[], AuthenticatedUser>,
+		res: Response<ImagePayload[], AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
 
 	changeImageVisibility: (
 		req: Request<
 			{ albumId: string; imageId: string },
-			Image,
+			ImagePayload,
 			object,
 			object,
 			AuthenticatedUser
 		>,
-		res: Response<Image, AuthenticatedUser>,
+		res: Response<ImagePayload, AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
 
 	deleteImage: (
 		req: Request<
 			{ albumId: string; imageId: string },
-			Image,
+			ImagePayload,
 			object,
 			object,
 			AuthenticatedUser
 		>,
-		res: Response<Image, AuthenticatedUser>,
+		res: Response<ImagePayload, AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
 

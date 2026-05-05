@@ -1,0 +1,12 @@
+model ChatUser {
+  id Int @id @default(autoincrement())
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @map("user_id")
+
+  chat   Chat @relation(fields: [chatId], references: [id])
+  chatId Int  @map("chat_id")
+
+  @@unique([userId, chatId])
+  @@map("chat_app_chat_users")
+}

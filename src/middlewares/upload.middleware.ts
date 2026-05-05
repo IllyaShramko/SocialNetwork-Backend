@@ -47,7 +47,6 @@ export function processImageMiddleware(
 							.jpeg({ quality })
 							.toFile(thumbnailFilePath),
 					]);
-					console.log(filename);
 					file.filename = filename;
 				}),
 			);

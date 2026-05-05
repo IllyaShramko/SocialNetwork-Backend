@@ -1,0 +1,19 @@
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  topic     String?
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  author    User        @relation(fields: [authorId], references: [id])
+  authorId  Int         @map("user_id")
+  tags      TagPost[]
+  links     PostLink[]
+  likes     PostLike[]
+  views     PostView[]
+  hearts    PostHeart[]
+  images    PostImage[]
+
+  @@map("post_app_post")
+}

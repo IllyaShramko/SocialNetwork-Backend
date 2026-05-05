@@ -30,20 +30,16 @@ export const UserController: UserControllerContract = {
 			req.body.code,
 			req.body.email,
 		);
-		res.status(200).json({ message: response.message });
+		res.status(200).json(response);
 	},
 	async me(req, res, next) {
 		const user = await UserService.me({ userId: res.locals.userId });
 		res.status(200).json(user);
 	},
 	async updateAvatar(req, res, next) {
-		if (!req.file) {
-			throw new BadRequestError("File is required");
-		}
-		const updatedUser = await UserService.updateAvatar(
-			res.locals.userId,
-			req.file.filename,
-		);
+		const updatedUser = await UserService.updateProfile(res.locals.userId, {
+			avatar: req.file!.filename,
+		});
 		res.set("Connection", "close").status(200).json(updatedUser);
 	},
 	async updateProfile(req, res, next) {
@@ -82,14 +78,14 @@ export const UserController: UserControllerContract = {
 		);
 		res.status(200).json(updatedUser);
 	},
-	async getAvatars(req, res, next) {
-		const avatars = await UserService.getMyAvatars(res.locals.userId)
-		res.status(200).json(avatars);
-	},
-	async deleteAvatar(req, res, next) {
-		if (!req.params.id) throw new BadRequestError("id is required")
-		if (isNaN(+req.params.id)) throw new BadRequestError("id must be integer")
-		const message = await UserService.deleteAvatar(res.locals.userId, +req.params.id)
-		res.status(200).json(message)
-	},
+	// async getAvatars(req, res, next) {
+	// 	const avatars = await UserService.getMyAvatars(res.locals.userId)
+	// 	res.status(200).json(avatars);
+	// },
+	// async deleteAvatar(req, res, next) {
+	// 	if (!req.params.id) throw new BadRequestError("id is required")
+	// 	if (isNaN(+req.params.id)) throw new BadRequestError("id must be integer")
+	// 	const message = await UserService.deleteAvatar(res.locals.userId, +req.params.id)
+	// 	res.status(200).json(message)
+	// },
 };

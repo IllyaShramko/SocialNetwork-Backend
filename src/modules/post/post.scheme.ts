@@ -12,10 +12,10 @@ export const postCreateSchema = yup.object({
 		.min(2, "Topic must be informative")
 		.required("Topic is required"),
 
-	description: yup
+	content: yup
 		.string()
-		.min(4, "Description must be more detailed")
-		.required("Description is required"),
+		.min(4, "Description (content) must be more detailed")
+		.required("Description (content) is required"),
 
 	tagIds: yup.array().of(yup.number().integer().min(0)).ensure(),
 

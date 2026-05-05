@@ -13,11 +13,10 @@ export const UserRepository: RepoContract = {
 		const user = await Client.user.findUnique({
 			where: { email: email },
 			include: {
-				avatars: {
-					include: {
-						image: true,
-					},
-				},
+				profile: true,
+			},
+			omit: {
+				password: true,
 			},
 		});
 		return user;
@@ -47,16 +46,11 @@ export const UserRepository: RepoContract = {
 		try {
 			const user = await Client.user.findUniqueOrThrow({
 				where: { id: id },
-				omit: { password: true },
+				omit: {
+					password: true,
+				},
 				include: {
-					avatars: {
-						include: {
-							image: true,
-						},
-						orderBy: {
-							id: "desc",
-						},
-					},
+					profile: true,
 				},
 			});
 			return user;
@@ -75,126 +69,12 @@ export const UserRepository: RepoContract = {
 			throw new InternalServerError();
 		}
 	},
-	async createVerificationCode({ email, code, expiresAt }) {
-		const codeDB = await Client.verificationCode.create({
-			data: {
-				email,
-				code,
-				expiresAt,
-			},
-		});
-		return codeDB;
-	},
-	async findVerificationByCode(code, email) {
+	async findProfileByUserId(userId) {
 		try {
-			const verification = await Client.verificationCode.findFirstOrThrow(
-				{
-					where: { AND: [{ code: code }, { email: email }] },
-				},
-			);
-			return verification;
-		} catch (error) {
-			if (error instanceof PrismaClientKnownRequestError) {
-				switch (error.code) {
-					case PrismaErrorCodes.NOT_EXIST:
-						throw new NotFoundError("Verification code");
-					default:
-						throw new InternalServerError();
-				}
-			}
-			if (error instanceof Error) {
-				throw new InternalServerError(error.message);
-			}
-			throw new InternalServerError();
-		}
-	},
-	async create(data) {
-		try {
-			const user = await Client.user.create({
-				data,
-				omit: { password: true },
-				include: {
-					avatars: {
-						include: {
-							image: true,
-						},
-					},
-				},
+			const profile = await Client.profile.findUniqueOrThrow({
+				where: { userId },
 			});
-			return user;
-		} catch (error) {
-			if (error instanceof PrismaClientKnownRequestError) {
-				switch (error.code) {
-					case PrismaErrorCodes.UNIQUE:
-						throw new ConflictError(
-							`User with such data (${data}) already exists`,
-						);
-					default:
-						throw new InternalServerError();
-				}
-			}
-			if (error instanceof Error) {
-				throw new InternalServerError(error.message);
-			}
-			throw new InternalServerError();
-		}
-	},
-	async updateProfile(id, data) {
-		try {
-			const updatedUser = await Client.user.update({
-				where: { id },
-				data,
-				omit: { password: true },
-				include: {
-					avatars: {
-						include: {
-							image: true,
-						},
-					},
-				},
-			});
-			return updatedUser;
-		} catch (error) {
-			if (error instanceof PrismaClientKnownRequestError) {
-				switch (error.code) {
-					case PrismaErrorCodes.NOT_EXIST:
-						throw new NotFoundError("User with id " + id);
-					default:
-						throw new InternalServerError();
-				}
-			}
-			if (error instanceof Error) {
-				throw new InternalServerError(error.message);
-			}
-			throw new InternalServerError();
-		}
-	},
-	async uploadAvatar(userId, filename) {
-		try {
-			const updatedUser = await Client.user.update({
-				where: { id: userId },
-				data: {
-					avatars: {
-						create: {
-							image: {
-								create: {
-									filename,
-									isVisible: true,
-									userId: userId,
-								},
-							},
-						},
-					},
-				},
-				include: {
-					avatars: {
-						include: { image: true },
-						orderBy: { id: "desc" },
-					},
-				},
-				omit: { password: true },
-			});
-			return updatedUser;
+			return profile;
 		} catch (error) {
 			if (error instanceof PrismaClientKnownRequestError) {
 				switch (error.code) {
@@ -210,41 +90,64 @@ export const UserRepository: RepoContract = {
 			throw new InternalServerError();
 		}
 	},
-	async getAvatarsByUserId(userId) {
+	// async createVerificationCode({ email, code, expiresAt }) {
+	// 	const codeDB = await Client.verificationCode.create({
+	// 		data: {
+	// 			email,
+	// 			code,
+	// 			expiresAt,
+	// 		},
+	// 	});
+	// 	return codeDB;
+	// },
+	// async findVerificationByCode(code, email) {
+	// 	try {
+	// 		const verification = await Client.verificationCode.findFirstOrThrow(
+	// 			{
+	// 				where: { AND: [{ code: code }, { email: email }] },
+	// 			},
+	// 		);
+	// 		return verification;
+	// 	} catch (error) {
+	// 		if (error instanceof PrismaClientKnownRequestError) {
+	// 			switch (error.code) {
+	// 				case PrismaErrorCodes.NOT_EXIST:
+	// 					throw new NotFoundError("Verification code");
+	// 				default:
+	// 					throw new InternalServerError();
+	// 			}
+	// 		}
+	// 		if (error instanceof Error) {
+	// 			throw new InternalServerError(error.message);
+	// 		}
+	// 		throw new InternalServerError();
+	// 	}
+	// },
+	async create(data) {
 		try {
-			const avatars = await Client.avatar.findMany({
-				where: {
-					userId: userId,
+			const user = await Client.user.create({
+				data: {
+					...data,
+					profile: {
+						create: {},
+					},
+				},
+				omit: {
+					password: true,
 				},
 				include: {
-					image: true,
-				},
-				orderBy: {
-					id: "desc",
+					profile: true,
 				},
 			});
-			return avatars;
-		} catch (error) {
-			if (error instanceof Error) {
-				throw new InternalServerError(error.message);
-			}
-			throw new InternalServerError();
-		}
-	},
-	async findAvatarById(id) {
-		try {
-			const avatar = await Client.avatar.findUniqueOrThrow({
-				where: { id: id },
-				include: {
-					image: true,
-				},
-			});
-			return avatar;
+			return user;
 		} catch (error) {
 			if (error instanceof PrismaClientKnownRequestError) {
 				switch (error.code) {
-					case PrismaErrorCodes.NOT_EXIST:
-						throw new NotFoundError("Avatar with id " + id);
+					case PrismaErrorCodes.UNIQUE:
+						const target = error.meta?.target || "data";
+						throw new ConflictError(
+							`User with this ${target} already exists`,
+						);
 					default:
 						throw new InternalServerError();
 				}
@@ -255,26 +158,124 @@ export const UserRepository: RepoContract = {
 			throw new InternalServerError();
 		}
 	},
-	async deleteAvatar(imageId) {
+	async updateProfile(id, data) {
 		try {
-			const image = await Client.image.delete({
-				where: { id: imageId },
+			const updatedUser = await Client.user.update({
+				where: { id },
+				data: {
+					profile: {
+						update: data,
+					},
+				},
+				include: {
+					profile: true,
+				},
 			});
+			return updatedUser;
+		} catch (error) {
+			if (error instanceof PrismaClientKnownRequestError) {
+				switch (error.code) {
+					case PrismaErrorCodes.NOT_EXIST:
+						throw new NotFoundError("User with id " + id);
+					default:
+						throw new InternalServerError();
+				}
+			}
+			if (error instanceof Error) {
+				throw new InternalServerError(error.message);
+			}
+			throw new InternalServerError();
+		}
+	},
+	async updateUser(id, data) {
+		try {
+			const updatedUser = await Client.user.update({
+				where: { id },
+				data,
+				omit: {
+					password: true,
+				},
+				include: {
+					profile: true,
+				},
+			});
+			return updatedUser;
+		} catch (error) {
+			if (error instanceof PrismaClientKnownRequestError) {
+				switch (error.code) {
+					case PrismaErrorCodes.NOT_EXIST:
+						throw new NotFoundError("User with id " + id);
+					default:
+						throw new InternalServerError();
+				}
+			}
+			if (error instanceof Error) {
+				throw new InternalServerError(error.message);
+			}
+			throw new InternalServerError();
+		}
+	},
+	// async uploadAvatar(userId, filename) {
+	// 	try {
+	// 		const updatedUser = await Client.user.update({
+	// 			where: { id: userId },
+	// 			data: {
+	// 				avatars: {
+	// 					create: {
+	// 						image: {
+	// 							create: {
+	// 								filename,
+	// 								isVisible: true,
+	// 								userId: userId,
+	// 							},
+	// 						},
+	// 					},
+	// 				},
+	// 			},
+	// 			include: {
+	// 				avatars: {
+	// 					include: { image: true },
+	// 					orderBy: { id: "desc" },
+	// 				},
+	// 			},
+	// 			omit: { password: true },
+	// 		});
+	// 		return updatedUser;
+	// 	} catch (error) {
+	// 		if (error instanceof PrismaClientKnownRequestError) {
+	// 			switch (error.code) {
+	// 				case PrismaErrorCodes.NOT_EXIST:
+	// 					throw new NotFoundError("User with id " + userId);
+	// 				default:
+	// 					throw new InternalServerError();
+	// 			}
+	// 		}
+	// 		if (error instanceof Error) {
+	// 			throw new InternalServerError(error.message);
+	// 		}
+	// 		throw new InternalServerError();
+	// 	}
+	// },
+	// async deleteAvatar(imageId) {
+	// 	try {
+	// 		const image = await Client.image.delete({
+	// 			where: { id: imageId },
+	// 		});
 
-			return { message: "SUCCESS" };
-		} catch (error) {
-			if (error instanceof PrismaClientKnownRequestError) {
-				switch (error.code) {
-					case PrismaErrorCodes.NOT_EXIST:
-						throw new NotFoundError("image with id " + imageId);
-					default:
-						throw new InternalServerError();
-				}
-			}
-			if (error instanceof Error) {
-				throw new InternalServerError(error.message);
-			}
-			throw new InternalServerError();
-		}
-	},
+	// 		return { message: "SUCCESS" };
+	// 	} catch (error) {
+	// 		if (error instanceof PrismaClientKnownRequestError) {
+	// 			switch (error.code) {
+	// 				case PrismaErrorCodes.NOT_EXIST:
+	// 					throw new NotFoundError("image with id " + imageId);
+	// 				default:
+	// 					throw new InternalServerError();
+	// 			}
+	// 		}
+	// 		if (error instanceof Error) {
+	// 			throw new InternalServerError(error.message);
+	// 		}
+	// 		throw new InternalServerError();
+	// 	}
+	// },
 };

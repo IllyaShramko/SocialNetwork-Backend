@@ -20,8 +20,6 @@ AlbumRouter.post(
 AlbumRouter.put("/:id", authMiddleware, AlbumController.updateAlbum);
 AlbumRouter.delete("/:id", authMiddleware, AlbumController.deleteAlbum);
 
-AlbumRouter.get("/tags", AlbumController.getTags);
-
 AlbumRouter.post(
 	"/:id/images",
 	authMiddleware,

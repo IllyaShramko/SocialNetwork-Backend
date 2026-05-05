@@ -1,19 +1,19 @@
 import type { NextFunction, Request, Response } from "express";
 import type {
-	Avatar,
 	CodeType,
-	CreateUserPayload,
+	CreateUserDTO,
 	LoginCredentials,
 	MeDTO,
+	Profile,
+	ProfileUpdateDTO,
 	RegisterCredentials,
 	TokenDTO,
 	UpdatePasswordDTO,
 	User,
-	UserProfileDTO,
+	UserAndProfileUpdateDTO,
 	UserUpdate,
+	UserUpdateDTO,
 	UserWithPassword,
-	VerificationCode,
-	VerificationCodeCreate,
 	VerificationResult,
 } from "./user.types";
 import { AuthenticatedUser } from "../../../types/token";
@@ -30,34 +30,39 @@ export interface UserService {
 		email: string,
 	) => Promise<{ message: VerificationResult }>;
 	me: (DTO: MeDTO) => Promise<User>;
-	updateAvatar: (userId: number, filename: string) => Promise<User>;
-	updateProfile: (userId: number, data: UserProfileDTO) => Promise<User>;
+	// updateAvatar: (userId: number, filename: string) => Promise<User>;
+	updateProfile: (
+		userId: number,
+		data: UserAndProfileUpdateDTO,
+	) => Promise<User>;
 	updatePassword: (userId: number, newPassword: string) => Promise<User>;
 	updateSignature: (userId: number, filename: string) => Promise<User>;
-	getMyAvatars: (userId: number) => Promise<Avatar[]>;
-	deleteAvatar: (
-		userId: number,
-		id: number,
-	) => Promise<{ message: "SUCCESS" }>;
+	// getMyAvatars: (userId: number) => Promise<Avatar[]>;
+	// deleteAvatar: (
+	// 	userId: number,
+	// 	id: number,
+	// ) => Promise<{ message: "SUCCESS" }>;
 }
 
 export interface UserRepository {
 	findByEmail: (email: string) => Promise<User | null>;
 	findByIdWithPassword: (id: number) => Promise<UserWithPassword>;
 	findById: (id: number) => Promise<User>;
-	createVerificationCode: (
-		data: VerificationCodeCreate,
-	) => Promise<VerificationCode>;
-	findVerificationByCode: (
-		code: string,
-		email: string,
-	) => Promise<VerificationCode>;
-	create: (data: CreateUserPayload) => Promise<User>;
+	findProfileByUserId: (userId: number) => Promise<Profile>
+	// createVerificationCode: (
+	// 	data: VerificationCodeCreate,
+	// ) => Promise<VerificationCode>;
+	// findVerificationByCode: (
+	// 	code: string,
+	// 	email: string,
+	// ) => Promise<VerificationCode>;
+	create: (data: CreateUserDTO) => Promise<User>;
+	updateUser: (userId: number, data: ProfileUpdateDTO) => Promise<User>;
 	updateProfile: (userId: number, data: UserUpdate) => Promise<User>;
-	getAvatarsByUserId: (userId: number) => Promise<Avatar[]>;
-	uploadAvatar: (userId: number, filename: string) => Promise<User>;
-	deleteAvatar: (id: number) => Promise<{ message: "SUCCESS" }>;
-	findAvatarById: (id: number) => Promise<Avatar>;
+	// getAvatarsByUserId: (userId: number) => Promise<Avatar[]>;
+	// uploadAvatar: (userId: number, filename: string) => Promise<User>;
+	// deleteAvatar: (id: number) => Promise<{ message: "SUCCESS" }>;
+	// findAvatarById: (id: number) => Promise<Avatar>;
 }
 
 export interface UserController {
@@ -83,10 +88,10 @@ export interface UserController {
 	validateCode: (
 		req: Request<
 			object,
-			{ message: "SUCCESS" | "NOT_CORRECT" | "EXPIRED" },
+			{ message: VerificationResult },
 			{ email: string; code: string }
 		>,
-		res: Response<{ message: "SUCCESS" | "NOT_CORRECT" | "EXPIRED" }>,
+		res: Response<{ message: VerificationResult }>,
 		next: NextFunction,
 	) => void;
 	me: (
@@ -102,7 +107,13 @@ export interface UserController {
 	) => void;
 
 	updateProfile: (
-		req: Request<object, object, UserProfileDTO, object, AuthenticatedUser>,
+		req: Request<
+			object,
+			object,
+			UserAndProfileUpdateDTO,
+			object,
+			AuthenticatedUser
+		>,
 		res: Response<User, AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
@@ -135,21 +146,21 @@ export interface UserController {
 		next: NextFunction,
 	) => void;
 
-	getAvatars: (
-		req: Request<object, Avatar[], object, object, AuthenticatedUser>,
-		res: Response<Avatar[], AuthenticatedUser>,
-		next: NextFunction,
-	) => void;
+	// getAvatars: (
+	// 	req: Request<object, Avatar[], object, object, AuthenticatedUser>,
+	// 	res: Response<Avatar[], AuthenticatedUser>,
+	// 	next: NextFunction,
+	// ) => void;
 
-	deleteAvatar: (
-		req: Request<
-			{ id: string },
-			{ message: "SUCCESS" },
-			object,
-			object,
-			AuthenticatedUser
-		>,
-		res: Response<{ message: "SUCCESS" }, AuthenticatedUser>,
-		next: NextFunction,
-	) => void;
+	// deleteAvatar: (
+	// 	req: Request<
+	// 		{ id: string },
+	// 		{ message: "SUCCESS" },
+	// 		object,
+	// 		object,
+	// 		AuthenticatedUser
+	// 	>,
+	// 	res: Response<{ message: "SUCCESS" }, AuthenticatedUser>,
+	// 	next: NextFunction,
+	// ) => void;
 }

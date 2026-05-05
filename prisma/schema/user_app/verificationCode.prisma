@@ -1,0 +1,10 @@
+model VerificationCode {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int      @map("user_id")
+  newEmail  String   @map("new_email")
+  code      String
+  expiresAt DateTime @map("expires_at")
+
+  @@map("emailverification")
+}

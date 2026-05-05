@@ -50,5 +50,9 @@ UserRouter.post(
 	authMiddleware,
 	UserController.sendVerificationPasswordResetCode,
 );
-UserRouter.get("/me/avatars", authMiddleware, UserController.getAvatars);
-UserRouter.delete("/me/avatars/:id", authMiddleware, UserController.deleteAvatar)
+// UserRouter.get("/me/avatars", authMiddleware, UserController.getAvatars);
+// UserRouter.delete(
+// 	"/me/avatars/:id",
+// 	authMiddleware,
+// 	UserController.deleteAvatar,
+// );

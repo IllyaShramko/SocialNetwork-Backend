@@ -14,8 +14,12 @@ export const AlbumRepository: AlbumRepositoryContract = {
 			const album = await Client.album.findUniqueOrThrow({
 				where: { id: id },
 				include: {
-					topic: true,
 					images: true,
+					profile: {
+						select: {
+							userId: true,
+						},
+					},
 				},
 			});
 			return album;
@@ -39,8 +43,12 @@ export const AlbumRepository: AlbumRepositoryContract = {
 			const album = await Client.album.create({
 				data,
 				include: {
-					topic: true,
 					images: true,
+					profile: {
+						select: {
+							userId: true,
+						},
+					},
 				},
 			});
 			return album;
@@ -57,8 +65,12 @@ export const AlbumRepository: AlbumRepositoryContract = {
 				where: { id: id },
 				data,
 				include: {
-					topic: true,
 					images: true,
+					profile: {
+						select: {
+							userId: true,
+						},
+					},
 				},
 			});
 			return album;
@@ -67,10 +79,7 @@ export const AlbumRepository: AlbumRepositoryContract = {
 				switch (error.code) {
 					case PrismaErrorCodes.NOT_EXIST:
 						throw new NotFoundError("Album with id " + id);
-					case PrismaErrorCodes.FOREIGN_KEY:
-						throw new NotFoundError("Topic with id " + id);
 					default:
-						console.log(error);
 						throw new InternalServerError();
 				}
 			}
@@ -85,8 +94,12 @@ export const AlbumRepository: AlbumRepositoryContract = {
 			const album = await Client.album.delete({
 				where: { id: id },
 				include: {
-					topic: true,
 					images: true,
+					profile: {
+						select: {
+							userId: true,
+						},
+					},
 				},
 			});
 			return album;
@@ -105,32 +118,40 @@ export const AlbumRepository: AlbumRepositoryContract = {
 			throw new InternalServerError();
 		}
 	},
-	async getTags() {
-		const tags = await Client.tag.findMany();
-		return tags;
-	},
-	async getAlbumsByUserId(userId) {
+	async getAlbumsByProfileId(profileId) {
 		const albums = await Client.album.findMany({
 			where: {
-				userId: userId,
+				profileId,
 			},
 			include: {
-				topic: true,
 				images: true,
+				profile: {
+					select: {
+						userId: true,
+					},
+				},
 			},
 		});
 		return albums;
 	},
 	async uploadImage(data) {
-		const image = await Client.image.create({ data });
+		const image = await Client.albumImage.create({ data });
 		return image;
 	},
 	async findImageById(id) {
 		try {
-			const image = await Client.image.findUniqueOrThrow({
+			const image = await Client.albumImage.findUniqueOrThrow({
 				where: { id: id },
 				include: {
-					album: true,
+					album: {
+						select: {
+							profile: {
+								select: {
+									userId: true,
+								},
+							},
+						},
+					},
 				},
 			});
 			return image;
@@ -151,10 +172,10 @@ export const AlbumRepository: AlbumRepositoryContract = {
 	},
 	async changeImageVisibility(id, visibility) {
 		try {
-			const image = await Client.image.update({
+			const image = await Client.albumImage.update({
 				where: { id: id },
 				data: {
-					isVisible: visibility,
+					isShown: visibility,
 				},
 			});
 			return image;
@@ -175,7 +196,7 @@ export const AlbumRepository: AlbumRepositoryContract = {
 	},
 	async deleteImage(id) {
 		try {
-			const image = await Client.image.delete({
+			const image = await Client.albumImage.delete({
 				where: { id: id },
 			});
 			return image;

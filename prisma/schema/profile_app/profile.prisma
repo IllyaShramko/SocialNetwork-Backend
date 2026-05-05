@@ -1,0 +1,19 @@
+model Profile {
+  id                 Int              @id @default(autoincrement())
+  user               User             @relation(fields: [userId], references: [id])
+  userId             Int              @unique @map("user_id")
+  birthDate          DateTime?        @map("birth_date")
+  signature          String?
+  pseudonym          String?
+  avatar             String?
+  is_image_signature Boolean          @default(true)
+  is_text_signature  Boolean          @default(true)
+  sentRequests       FriendsRequest[] @relation("from_profile")
+  receivedRequests   FriendsRequest[] @relation("to_profile")
+  friends            ProfileFriends[] @relation("from_profile_link")
+  friendOf           ProfileFriends[] @relation("to_profile_link")
+
+  albums Album[]
+
+  @@map("profile_app_profile")
+}

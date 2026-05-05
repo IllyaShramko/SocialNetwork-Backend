@@ -17,7 +17,7 @@ export const PostRepository: PostRepositoryContract = {
 			include: {
 				images: true,
 				links: true,
-				tagPosts: {
+				tags: {
 					include: {
 						tag: true,
 					},
@@ -25,6 +25,17 @@ export const PostRepository: PostRepositoryContract = {
 				author: {
 					omit: {
 						password: true,
+					},
+					include: {
+						profile: {
+							select: {
+								pseudonym: true,
+								signature: true,
+								avatar: true,
+								is_image_signature: true,
+								is_text_signature: true,
+							},
+						},
 					},
 				},
 			},
@@ -46,7 +57,7 @@ export const PostRepository: PostRepositoryContract = {
 			include: {
 				images: true,
 				links: true,
-				tagPosts: {
+				tags: {
 					include: {
 						tag: true,
 					},
@@ -54,6 +65,17 @@ export const PostRepository: PostRepositoryContract = {
 				author: {
 					omit: {
 						password: true,
+					},
+					include: {
+						profile: {
+							select: {
+								pseudonym: true,
+								signature: true,
+								avatar: true,
+								is_image_signature: true,
+								is_text_signature: true,
+							},
+						},
 					},
 				},
 			},
@@ -68,27 +90,25 @@ export const PostRepository: PostRepositoryContract = {
 			const post = await Client.post.create({
 				data: {
 					...data,
-					views: 0,
-					tagPosts: {
+					tags: {
 						create: tagIds.map((id) => ({
 							tag: { connect: { id } },
 						})),
 					},
 					links: {
 						create: links.map((url) => ({
-							href: url,
+							url,
 						})),
 					},
 					images: {
 						create: images.map((filename) => ({
-							filename: filename,
-							isVisible: true,
-							userId: data.authorId,
+							originalImage: filename,
+							comressedImage: filename,
 						})),
 					},
 				},
 				include: {
-					tagPosts: {
+					tags: {
 						include: {
 							tag: true,
 						},
@@ -99,14 +119,23 @@ export const PostRepository: PostRepositoryContract = {
 						omit: {
 							password: true,
 						},
+						include: {
+							profile: {
+								select: {
+									pseudonym: true,
+									signature: true,
+									avatar: true,
+									is_image_signature: true,
+									is_text_signature: true,
+								},
+							},
+						},
 					},
 				},
 			});
-
 			return post;
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
-				console.log(error);
 				switch (error.code) {
 					case PrismaErrorCodes.UNIQUE:
 						throw new ConflictError("this post");

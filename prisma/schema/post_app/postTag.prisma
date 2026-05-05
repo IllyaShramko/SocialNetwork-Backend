@@ -1,0 +1,12 @@
+model TagPost {
+  id Int @id @default(autoincrement())
+
+  tag   Tag @relation(fields: [tagId], references: [id])
+  tagId Int @map("tag_id")
+
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int  @map("post_id")
+
+  @@unique([tagId, postId])
+  @@map("post_app_post_tags")
+}

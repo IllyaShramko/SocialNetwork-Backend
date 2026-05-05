@@ -11,7 +11,6 @@ import {
 import { compare, hash } from "bcryptjs";
 import { sign } from "jsonwebtoken";
 import { env } from "node:process";
-import { CreateUserPayload } from "./types/user.types";
 
 export const UserService: ServiceContract = {
 	async login(credentials) {
@@ -55,7 +54,7 @@ export const UserService: ServiceContract = {
 			throw new ConflictError(`User with email ${credentials.email}`);
 		}
 		const hashedPassword = await hash(credentials.password, 10);
-		const userToCreate: CreateUserPayload = {
+		const userToCreate = {
 			...credentials,
 			password: hashedPassword,
 		};
@@ -88,11 +87,11 @@ export const UserService: ServiceContract = {
 			const code = generateCode();
 			const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 			try {
-				await UserRepository.createVerificationCode({
-					email,
-					code,
-					expiresAt,
-				});
+				// await UserRepository.createVerificationCode({
+				// 	email,
+				// 	code,
+				// 	expiresAt,
+				// });
 			} catch (error) {
 				throw new InternalServerError(
 					"Error creating verification code",
@@ -118,11 +117,11 @@ export const UserService: ServiceContract = {
 			const code = generateCode();
 			const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 			try {
-				await UserRepository.createVerificationCode({
-					email,
-					code,
-					expiresAt,
-				});
+				// await UserRepository.createVerificationCode({
+				// 	email,
+				// 	code,
+				// 	expiresAt,
+				// });
 			} catch (error) {
 				throw new InternalServerError(
 					"Error creating verification code",
@@ -138,30 +137,24 @@ export const UserService: ServiceContract = {
 		return { message: "SUCCESS" };
 	},
 	async validateCode(code, email) {
-		const verification = await UserRepository.findVerificationByCode(
-			code,
-			email,
-		);
-		if (verification.expiresAt < new Date()) {
-			throw new NotFoundError("Verification code has expired");
-		}
-		if (verification.email !== email) {
-			throw new NotFoundError("Verification code is not correct");
-		}
+		// const verification = await UserRepository.findVerificationByCode(
+		// 	code,
+		// 	email,
+		// );
+		// if (verification.expiresAt < new Date()) {
+		// 	throw new NotFoundError("Verification code has expired");
+		// }
+		// if (verification.email !== email) {
+		// 	throw new NotFoundError("Verification code is not correct");
+		// }
 		return { message: "SUCCESS" };
 	},
 	async me(DTO) {
 		const user = await UserRepository.findById(DTO.userId);
 		return user;
 	},
-	async updateAvatar(userId, avatarUrl) {
-		const updatedUser = await UserRepository.uploadAvatar(
-			userId,
-			avatarUrl,
-		);
-		return updatedUser;
-	},
 	async updateProfile(userId, data) {
+		await UserRepository.updateUser(userId, data);
 		const updatedUser = await UserRepository.updateProfile(userId, data);
 		return updatedUser;
 	},
@@ -178,16 +171,16 @@ export const UserService: ServiceContract = {
 		});
 		return updatedUser;
 	},
-	async getMyAvatars(userId) {
-		const images = await UserRepository.getAvatarsByUserId(userId);
-		return images;
-	},
-	async deleteAvatar(userId, id) {
-		const avatar = await UserRepository.findAvatarById(id);
-		if (avatar.userId !== userId || avatar.image.userId !== userId) {
-			throw new ForbiddenError(`avatar with id ${avatar.id}`);
-		}
-		const deletedAvatar = await UserRepository.deleteAvatar(avatar.imageId);
-		return deletedAvatar;
-	},
+	// async getMyAvatars(userId) {
+	// 	const images = await UserRepository.getAvatarsByUserId(userId);
+	// 	return images;
+	// },
+	// async deleteAvatar(userId, id) {
+	// 	const avatar = await UserRepository.findAvatarById(id);
+	// 	if (avatar.userId !== userId || avatar.image.userId !== userId) {
+	// 		throw new ForbiddenError(`avatar with id ${avatar.id}`);
+	// 	}
+	// 	const deletedAvatar = await UserRepository.deleteAvatar(avatar.imageId);
+	// 	return deletedAvatar;
+	// },
 };

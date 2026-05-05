@@ -39,10 +39,6 @@ export const AlbumController: AlbumControllerContract = {
 		);
 		res.status(200).json(deletedAlbum);
 	},
-	async getTags(req, res, next) {
-		const tags = await AlbumService.getTags();
-		res.status(200).json(tags);
-	},
 	async getMyAlbums(req, res, next) {
 		const albums = await AlbumService.getMyAlbums(res.locals.userId);
 		res.status(200).json(albums);

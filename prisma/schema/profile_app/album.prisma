@@ -1,0 +1,15 @@
+model Album {
+  id        Int          @id @default(autoincrement())
+  name      String
+  theme     String
+  year      Int
+  createdAt DateTime     @default(now()) @map("created_at")
+  isShown   Boolean      @map("is_shown")
+  isDefault Boolean      @map("is_default")
+  images    AlbumImage[]
+
+  profile   Profile @relation(fields: [profileId], references: [id])
+  profileId Int     @map("profile_id")
+
+  @@map("profile_app_album")
+}

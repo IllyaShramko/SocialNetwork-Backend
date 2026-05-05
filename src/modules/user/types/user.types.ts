@@ -3,27 +3,21 @@ import { type InferType } from "yup";
 import { loginSchema, regSchema } from "../user.schema";
 
 export type User = Prisma.UserGetPayload<{
+	include: {
+		profile: true;
+	};
 	omit: {
 		password: true;
 	};
-	include: {
-		avatars: {
-			include: {
-				image: true;
-			};
-		};
-	};
 }>;
 
-export type Avatar = Prisma.AvatarGetPayload<{
-	include: {
-		image: true
-	}
-}>
+export type Profile = Prisma.ProfileGetPayload<{}>
+// export type VerificationCode = Prisma.VerificationCodeGetPayload<{}>;
 
-export type VerificationCode = Prisma.VerificationCodeGetPayload<{}>;
-
-export type CreateUserPayload = Prisma.UserUncheckedCreateInput;
+export interface CreateUserDTO {
+	email: string;
+	password: string;
+}
 
 export type UserWithPassword = Prisma.UserGetPayload<{}>;
 
@@ -31,21 +25,24 @@ export type LoginCredentials = InferType<typeof loginSchema>;
 
 export type RegisterCredentials = InferType<typeof regSchema>;
 
-export interface UserAvatarDTO {}
 
-export interface UserProfileDTO {
+export interface UserUpdateDTO {
 	username?: string;
 	firstName?: string;
-	surname?: string;
-	birthday?: Date;
+	lastName?: string;
 	email?: string;
 }
+
+export interface ProfileUpdateDTO {
+	birthDate?: Date;
+	avatar?: string;
+}
+
+export type UserAndProfileUpdateDTO = UserUpdateDTO & ProfileUpdateDTO
 
 export interface UpdatePasswordDTO {
 	newPassword: string;
 }
-
-export interface UpdateSiqnatureDTO {}
 
 export type UserUpdate = Prisma.UserUpdateInput;
 
@@ -60,6 +57,4 @@ export type VerificationResult = "SUCCESS" | "NOT_CORRECT" | "EXPIRED";
 
 export type CodeType = "PASSWORD_RESET" | "EMAIL_VERIFICATION";
 
-export type VerificationCodeCreate = Prisma.VerificationCodeCreateInput;
-
-export type Image = Prisma.ImageGetPayload<{}>;
+// export type VerificationCodeCreate = Prisma.VerificationCodeCreateInput;

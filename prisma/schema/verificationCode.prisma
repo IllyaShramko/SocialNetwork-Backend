@@ -1,6 +1,0 @@
-model VerificationCode {
-  id        Int      @id @default(autoincrement())
-  email     String
-  code      String
-  expiresAt DateTime
-}

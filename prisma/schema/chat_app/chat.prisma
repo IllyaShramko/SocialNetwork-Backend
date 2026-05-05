@@ -1,0 +1,13 @@
+model Chat {
+  id      Int     @id @default(autoincrement())
+  name    String?
+  isGroup Boolean @map("is_group")
+  avatar  String
+  admin   User?   @relation(fields: [adminId], references: [id])
+  adminId Int?    @map("admin_id")
+
+  users    ChatUser[]
+  messages Message[]
+
+  @@map("chat_app_chat")
+}

@@ -1,18 +1,20 @@
+import { UserRepository } from "../user/user.repository";
 import { PostRepository } from "./post.repository";
 import type { PostServiceContract } from "./types/post.contracts";
 import { PostCreate } from "./types/post.types";
 
 export const PostService: PostServiceContract = {
 	async createPost(data, userId) {
+		const profile = await UserRepository.findById(userId);
 		const mainData: PostCreate = {
 			title: data.title,
 			topic: data.topic,
-			description: data.description,
-			authorId: userId,
+			content: data.content,
+			authorId: profile.id,
 		};
-		const tagsId = data.tagIds || [];
-		const images = data.images || [];
-		const links = data.links || [];
+		const tagsId = data.tagIds;
+		const images = data.images;
+		const links = data.links;
 		const post = await PostRepository.createPost(
 			mainData,
 			images,

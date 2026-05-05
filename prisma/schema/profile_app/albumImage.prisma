@@ -1,0 +1,10 @@
+model AlbumImage {
+  id        Int      @id @default(autoincrement())
+  image     String
+  isShown   Boolean  @map("is_shown")
+  createdAt DateTime @default(now()) @map("created_at")
+  album     Album    @relation(fields: [albumId], references: [id])
+  albumId   Int      @map("album_id")
+
+  @@map("profile_app_albumimage")
+}
