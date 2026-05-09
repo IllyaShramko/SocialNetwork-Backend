@@ -37,6 +37,7 @@ export interface UserService {
 	) => Promise<User>;
 	updatePassword: (userId: number, newPassword: string) => Promise<User>;
 	updateSignature: (userId: number, filename: string) => Promise<User>;
+	getById: (id: number) => Promise<User>;
 	// getMyAvatars: (userId: number) => Promise<Avatar[]>;
 	// deleteAvatar: (
 	// 	userId: number,
@@ -48,7 +49,14 @@ export interface UserRepository {
 	findByEmail: (email: string) => Promise<User | null>;
 	findByIdWithPassword: (id: number) => Promise<UserWithPassword>;
 	findById: (id: number) => Promise<User>;
-	findProfileByUserId: (userId: number) => Promise<Profile>
+	findProfileByUserId: (userId: number) => Promise<Profile>;
+	getRequestsByUserId: (userId: number) => Promise<User[]>;
+	getFriendsByUserId: (userId: number) => Promise<User[]>;
+	getRecs: (exludeIds: number[]) => Promise<User[]>;
+	// createRequest: (userId: number, toId:number) => Promise<>
+	create: (data: CreateUserDTO) => Promise<User>;
+	updateUser: (userId: number, data: UserUpdate) => Promise<User>;
+	updateProfile: (userId: number, data: ProfileUpdate & UserUpdate) => Promise<User>;
 	// createVerificationCode: (
 	// 	data: VerificationCodeCreate,
 	// ) => Promise<VerificationCode>;
@@ -56,9 +64,6 @@ export interface UserRepository {
 	// 	code: string,
 	// 	email: string,
 	// ) => Promise<VerificationCode>;
-	create: (data: CreateUserDTO) => Promise<User>;
-	updateUser: (userId: number, data: UserUpdate) => Promise<User>;
-	updateProfile: (userId: number, data: ProfileUpdate) => Promise<User>;
 	// getAvatarsByUserId: (userId: number) => Promise<Avatar[]>;
 	// uploadAvatar: (userId: number, filename: string) => Promise<User>;
 	// deleteAvatar: (id: number) => Promise<{ message: "SUCCESS" }>;
@@ -94,6 +99,7 @@ export interface UserController {
 		res: Response<{ message: VerificationResult }>,
 		next: NextFunction,
 	) => void;
+
 	me: (
 		req: Request<object, object, object, object, AuthenticatedUser>,
 		res: Response<User, AuthenticatedUser>,
@@ -145,6 +151,20 @@ export interface UserController {
 		res: Response<{ message: "SUCCESS" | "NOT_EXISTS" }>,
 		next: NextFunction,
 	) => void;
+
+	getById: (
+		req: Request<{ id: string }, User>,
+		res: Response<User>,
+		next: NextFunction,
+	) => void;
+
+	getFriends: (
+		req: Request<{ id: string }, User>,
+		res: Response<User>,
+		next: NextFunction,
+	) => void;
+
+
 
 	// getAvatars: (
 	// 	req: Request<object, Avatar[], object, object, AuthenticatedUser>,

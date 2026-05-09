@@ -154,12 +154,14 @@ export const UserService: ServiceContract = {
 	},
 	async updateProfile(userId, data) {
 		const { pseudonym, avatar, birthDate, ...userData } = data;
-		console.log(userData);
-		await UserRepository.updateProfile(userId, {
-			pseudonym,
-			avatar,
-			birthDate,
-		});
+
+		const profileData = Object.fromEntries(
+			Object.entries({ pseudonym, avatar, birthDate }).filter(
+				([_, v]) => v !== undefined,
+			),
+		);
+
+		await UserRepository.updateProfile(userId, profileData);
 		const updatedUser = await UserRepository.updateUser(userId, userData);
 		return updatedUser;
 	},

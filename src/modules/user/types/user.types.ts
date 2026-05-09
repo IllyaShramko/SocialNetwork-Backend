@@ -25,28 +25,28 @@ export type LoginCredentials = InferType<typeof loginSchema>;
 
 export type RegisterCredentials = InferType<typeof regSchema>;
 
-export type UserUpdateDTO = Prisma.UserGetPayload<{
-	select: {
-		username: true;
-		firstName: true;
-		lastName: true;
-		email: true;
-	};
-}>;
+export type UserUpdateDTO = {
+	username?: string;
+	firstName?: string;
+	lastName?: string;
+	email?: string;
+};
 
-export type ProfileUpdateDTO = Prisma.ProfileGetPayload<{
-	select: { birthDate: true; avatar: true; pseudonym: true; signature: true };
-}>;
+export type ProfileUpdateDTO = {
+	birthDate?: Date;
+	avatar?: string;
+	pseudonym?: string;
+	signature?: string;
+};
 
-export type ProfileUpdate = Prisma.ProfileUncheckedUpdateInput
+export type ProfileUpdate = Pick<Prisma.ProfileUpdateInput, 'pseudonym' | 'avatar' | 'birthDate'>;
+export type UserUpdate = Omit<Prisma.UserUpdateInput, 'pseudonym' | 'avatar' | 'birthDate'>;
 
 export type UserAndProfileUpdateDTO = UserUpdateDTO & ProfileUpdateDTO;
 
 export interface UpdatePasswordDTO {
 	newPassword: string;
 }
-
-export type UserUpdate = Prisma.UserUpdateInput;
 
 export type MeDTO = {
 	userId: number;
@@ -58,5 +58,20 @@ export type TokenDTO = {
 export type VerificationResult = "SUCCESS" | "NOT_CORRECT" | "EXPIRED";
 
 export type CodeType = "PASSWORD_RESET" | "EMAIL_VERIFICATION";
+
+export type FriendRequest = Prisma.FriendsRequestGetPayload<{
+	include: {
+		toProfile: true;
+	};
+}>;
+
+export type Friend = Prisma.ProfileFriendsGetPayload<{
+	include: {
+		toProfile: true;
+		fromProfile: true;
+	};
+}>;
+
+// export type ProfileWithPosts
 
 // export type VerificationCodeCreate = Prisma.VerificationCodeCreateInput;

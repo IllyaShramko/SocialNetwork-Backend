@@ -29,6 +29,7 @@ export const updateUserSchema = yup.object({
 	surname: yup.string().nullable(),
 	birthday: yup.date().nullable(),
 	username: yup.string().nullable(),
+	pseudonym: yup.string().nullable(),
 });
 
 export const updatePasswordSchema = yup.object({

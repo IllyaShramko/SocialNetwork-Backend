@@ -189,6 +189,7 @@ export const UserRepository: RepoContract = {
 	},
 	async updateUser(id, data) {
 		try {
+			console.log(id, data)
 			const updatedUser = await Client.user.update({
 				where: { id },
 				data,
