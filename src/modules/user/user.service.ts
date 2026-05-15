@@ -178,16 +178,8 @@ export const UserService: ServiceContract = {
 		});
 		return updatedUser;
 	},
-	// async getMyAvatars(userId) {
-	// 	const images = await UserRepository.getAvatarsByUserId(userId);
-	// 	return images;
-	// },
-	// async deleteAvatar(userId, id) {
-	// 	const avatar = await UserRepository.findAvatarById(id);
-	// 	if (avatar.userId !== userId || avatar.image.userId !== userId) {
-	// 		throw new ForbiddenError(`avatar with id ${avatar.id}`);
-	// 	}
-	// 	const deletedAvatar = await UserRepository.deleteAvatar(avatar.imageId);
-	// 	return deletedAvatar;
-	// },
+	async getFullProfileById(id) {
+		const profile = await UserRepository.getFullProfileById(id);
+		return profile;
+	},
 };

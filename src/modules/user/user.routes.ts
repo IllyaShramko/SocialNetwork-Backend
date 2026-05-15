@@ -14,14 +14,20 @@ UserRouter.post(
 	validateMiddleware(loginSchema),
 	UserController.login,
 );
+
 UserRouter.post(
 	"/register",
 	validateMiddleware(regSchema),
 	UserController.register,
 );
+
 UserRouter.post("/generate-code", UserController.generateCode);
+
 UserRouter.post("/validate-code", UserController.validateCode);
+
 UserRouter.get("/me", authMiddleware, UserController.me);
+
+UserRouter.get("/:profileId", authMiddleware, UserController.getFullProfileById)
 
 UserRouter.patch(
 	"/me/avatar",
@@ -37,7 +43,9 @@ UserRouter.patch(
 	validateMiddleware(updateUserSchema),
 	UserController.updateProfile,
 );
+
 UserRouter.patch("/me/password", authMiddleware, UserController.updatePassword);
+
 UserRouter.patch(
 	"/me/signature",
 	authMiddleware,
@@ -45,14 +53,9 @@ UserRouter.patch(
 	processImageMiddleware(200),
 	UserController.updateSignature,
 );
+
 UserRouter.post(
 	"/me/password-reset-code",
 	authMiddleware,
 	UserController.sendVerificationPasswordResetCode,
 );
-// UserRouter.get("/me/avatars", authMiddleware, UserController.getAvatars);
-// UserRouter.delete(
-// 	"/me/avatars/:id",
-// 	authMiddleware,
-// 	UserController.deleteAvatar,
-// );

@@ -189,7 +189,6 @@ export const UserRepository: RepoContract = {
 	},
 	async updateUser(id, data) {
 		try {
-			console.log(id, data)
 			const updatedUser = await Client.user.update({
 				where: { id },
 				data,
@@ -216,67 +215,37 @@ export const UserRepository: RepoContract = {
 			throw new InternalServerError();
 		}
 	},
-	// async uploadAvatar(userId, filename) {
-	// 	try {
-	// 		const updatedUser = await Client.user.update({
-	// 			where: { id: userId },
-	// 			data: {
-	// 				avatars: {
-	// 					create: {
-	// 						image: {
-	// 							create: {
-	// 								filename,
-	// 								isVisible: true,
-	// 								userId: userId,
-	// 							},
-	// 						},
-	// 					},
-	// 				},
-	// 			},
-	// 			include: {
-	// 				avatars: {
-	// 					include: { image: true },
-	// 					orderBy: { id: "desc" },
-	// 				},
-	// 			},
-	// 			omit: { password: true },
-	// 		});
-	// 		return updatedUser;
-	// 	} catch (error) {
-	// 		if (error instanceof PrismaClientKnownRequestError) {
-	// 			switch (error.code) {
-	// 				case PrismaErrorCodes.NOT_EXIST:
-	// 					throw new NotFoundError("User with id " + userId);
-	// 				default:
-	// 					throw new InternalServerError();
-	// 			}
-	// 		}
-	// 		if (error instanceof Error) {
-	// 			throw new InternalServerError(error.message);
-	// 		}
-	// 		throw new InternalServerError();
-	// 	}
-	// },
-	// async deleteAvatar(imageId) {
-	// 	try {
-	// 		const image = await Client.image.delete({
-	// 			where: { id: imageId },
-	// 		});
-
-	// 		return { message: "SUCCESS" };
-	// 	} catch (error) {
-	// 		if (error instanceof PrismaClientKnownRequestError) {
-	// 			switch (error.code) {
-	// 				case PrismaErrorCodes.NOT_EXIST:
-	// 					throw new NotFoundError("image with id " + imageId);
-	// 				default:
-	// 					throw new InternalServerError();
-	// 			}
-	// 		}
-	// 		if (error instanceof Error) {
-	// 			throw new InternalServerError(error.message);
-	// 		}
-	// 		throw new InternalServerError();
-	// 	}
-	// },
+	async getFullProfileById(id) {
+		try {
+			const profile = await Client.profile.findUniqueOrThrow({
+				where: { id },
+				include: {
+					user: {
+						omit: {
+							password: true,
+						},
+					},
+					albums: {
+						include: {
+							images: true,
+						},
+					},
+				},
+			});
+			return profile;
+		} catch (error) {
+			if (error instanceof PrismaClientKnownRequestError) {
+				switch (error.code) {
+					case PrismaErrorCodes.NOT_EXIST:
+						throw new NotFoundError("Profie with id " + id);
+					default:
+						throw new InternalServerError();
+				}
+			}
+			if (error instanceof Error) {
+				throw new InternalServerError(error.message);
+			}
+			throw new InternalServerError();
+		}
+	},
 };

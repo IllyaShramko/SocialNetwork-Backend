@@ -4,88 +4,138 @@ import { BadRequestError } from "@errors/app.errors";
 
 export const UserController: UserControllerContract = {
 	async login(req, res, next) {
-		const tokenDTO = await UserService.login(req.body);
-		res.status(200).json({ token: tokenDTO.token });
+		try {
+			const tokenDTO = await UserService.login(req.body);
+			res.status(200).json({ token: tokenDTO.token });
+		} catch (error) {
+			next(error);
+		}
 	},
 	async register(req, res, next) {
-		const tokenDTO = await UserService.register(req.body);
-		res.status(200).json({ token: tokenDTO.token });
+		try {
+			const tokenDTO = await UserService.register(req.body);
+			res.status(200).json({ token: tokenDTO.token });
+		} catch (error) {
+			next(error);
+		}
 	},
 	async generateCode(req, res, next) {
-		if (!req.body) throw new BadRequestError("Body is required");
-		if (!req.body.email) throw new BadRequestError("Email is required");
-		const response = await UserService.generateCode(
-			req.body.email,
-			"EMAIL_VERIFICATION",
-		);
+		try {
+			if (!req.body) throw new BadRequestError("Body is required");
+			if (!req.body.email) throw new BadRequestError("Email is required");
+			const response = await UserService.generateCode(
+				req.body.email,
+				"EMAIL_VERIFICATION",
+			);
 
-		res.status(200).json({ message: response.message });
+			res.status(200).json({ message: response.message });
+		} catch (error) {
+			next(error);
+		}
 	},
 	async validateCode(req, res, next) {
-		if (!req.body) throw new BadRequestError("Body is required");
-		if (!req.body.email) throw new BadRequestError("Email is required");
-		if (!req.body.code) throw new BadRequestError("Code is required");
+		try {
+			if (!req.body) throw new BadRequestError("Body is required");
+			if (!req.body.email) throw new BadRequestError("Email is required");
+			if (!req.body.code) throw new BadRequestError("Code is required");
 
-		const response = await UserService.validateCode(
-			req.body.code,
-			req.body.email,
-		);
-		res.status(200).json(response);
+			const response = await UserService.validateCode(
+				req.body.code,
+				req.body.email,
+			);
+			res.status(200).json(response);
+		} catch (error) {
+			next(error);
+		}
 	},
 	async me(req, res, next) {
-		const user = await UserService.me({ userId: res.locals.userId });
-		res.status(200).json(user);
+		try {
+			const user = await UserService.me({ userId: res.locals.userId });
+			res.status(200).json(user);
+		} catch (error) {
+			next(error);
+		}
 	},
 	async updateAvatar(req, res, next) {
-		const updatedUser = await UserService.updateProfile(res.locals.userId, {
-			avatar: req.file!.filename,
-		});
-		res.set("Connection", "close").status(200).json(updatedUser);
+		try {
+			const updatedUser = await UserService.updateProfile(
+				res.locals.userId,
+				{
+					avatar: req.file!.filename,
+				},
+			);
+			res.set("Connection", "close").status(200).json(updatedUser);
+		} catch (error) {
+			next(error);
+		}
 	},
 	async updateProfile(req, res, next) {
-		const updatedUser = await UserService.updateProfile(
-			res.locals.userId,
-			req.body,
-		);
-		res.set("Connection", "close").status(200).json(updatedUser);
+		try {
+			const updatedUser = await UserService.updateProfile(
+				res.locals.userId,
+				req.body,
+			);
+			res.set("Connection", "close").status(200).json(updatedUser);
+		} catch (error) {
+			next(error);
+		}
 	},
 	async updatePassword(req, res, next) {
-		if (!req.body) throw new BadRequestError("Body is required");
-		if (!req.body.newPassword)
-			throw new BadRequestError("New password is required");
-		const updatedUser = await UserService.updatePassword(
-			res.locals.userId,
-			req.body.newPassword,
-		);
-		res.status(200).json(updatedUser);
+		try {
+			if (!req.body) throw new BadRequestError("Body is required");
+			if (!req.body.newPassword)
+				throw new BadRequestError("New password is required");
+			const updatedUser = await UserService.updatePassword(
+				res.locals.userId,
+				req.body.newPassword,
+			);
+			res.status(200).json(updatedUser);
+		} catch (error) {
+			next(error);
+		}
 	},
 	async sendVerificationPasswordResetCode(req, res, next) {
-		if (!req.body) throw new BadRequestError("Body is required");
-		if (!req.body.email) throw new BadRequestError("Email is required");
-		const response = await UserService.generateCode(
-			req.body.email,
-			"PASSWORD_RESET",
-		);
-		res.status(200).json({ message: response.message });
+		try {
+			if (!req.body) throw new BadRequestError("Body is required");
+			if (!req.body.email) throw new BadRequestError("Email is required");
+			const response = await UserService.generateCode(
+				req.body.email,
+				"PASSWORD_RESET",
+			);
+			res.status(200).json({ message: response.message });
+		} catch (error) {
+			next(error);
+		}
 	},
 	async updateSignature(req, res, next) {
-		if (!req.file) {
-			throw new BadRequestError("File is required");
+		try {
+			if (!req.file) {
+				throw new BadRequestError("File is required");
+			}
+			const updatedUser = await UserService.updateSignature(
+				res.locals.userId,
+				req.file.filename,
+			);
+			res.status(200).json(updatedUser);
+		} catch (error) {
+			next(error);
 		}
-		const updatedUser = await UserService.updateSignature(
-			res.locals.userId,
-			req.file.filename,
-		);
-		res.status(200).json(updatedUser);
 	},
-	// async getAvatars(req, res, next) {
-	// 	const avatars = await UserService.getMyAvatars(res.locals.userId)
-	// 	res.status(200).json(avatars);
-	// },
-	// async deleteAvatar(req, res, next) {
-	// 	if (!req.params.id) throw new BadRequestError("id is required")
-	// 	if (isNaN(+req.params.id)) throw new BadRequestError("id must be integer")
-	// 	const message = await UserService.deleteAvatar(res.locals.userId, +req.params.id)
-	// 	res.status(200).json(message)
-	// },
+	async getFullProfileById(req, res, next) {
+		try {
+			if (req.params.profileId) {
+				if (isNaN(+req.params.profileId)) {
+					throw new BadRequestError("profileId must be integer");
+				}
+			} else {
+				throw new BadRequestError("profileId is required");
+			}
+			const profile = await UserService.getFullProfileById(
+				+req.params.profileId,
+			);
+			res.status(200).json(profile);
+		} catch (error) {
+			next(error);
+		}
+	},
 };

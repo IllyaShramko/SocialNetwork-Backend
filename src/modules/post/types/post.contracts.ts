@@ -12,7 +12,11 @@ export type PostRepositoryContract = {
 	//
 	getUserPosts: (userId: number) => Promise<PostFullInfoDTO[]>;
 
-	getAllPosts: (skip?: number, take?: number) => Promise<PostFullInfoDTO[]>;
+	getAllPosts: (
+		skip?: number,
+		take?: number,
+		userId?: number,
+	) => Promise<PostFullInfoDTO[]>;
 
 	getAllTags: () => Promise<Tag[]>;
 };
@@ -22,7 +26,12 @@ export type PostServiceContract = {
 
 	getUserPosts: (userId: number) => Promise<PostToShow[]>;
 
-	getAllPosts: (page: number, postsPerPage: number, userId: number) => Promise<PostToShow[]>;
+	getAllPosts: (
+		page: number,
+		postsPerPage: number,
+		userId: number,
+		targetUserId?: number,
+	) => Promise<PostToShow[]>;
 
 	getAllTags: () => Promise<Tag[]>;
 };
@@ -45,8 +54,14 @@ export type PostControllerContract = {
 		next: NextFunction,
 	) => Promise<void>;
 	getAllPosts: (
-		req: Request<{ pageNumber: string }, PostToShow[]>,
-		res: Response<PostToShow[]>,
+		req: Request<
+			{ pageNumber: string },
+			PostToShow[],
+			object,
+			{ userId?: string },
+			AuthenticatedUser
+		>,
+		res: Response<PostToShow[], AuthenticatedUser>,
 		next: NextFunction,
 	) => Promise<void>;
 	getAllTags: (

@@ -6,6 +6,7 @@ import type {
 	MeDTO,
 	Profile,
 	ProfileUpdate,
+	ProfileWithAlbumsAndPostsAndUser,
 	RegisterCredentials,
 	TokenDTO,
 	UpdatePasswordDTO,
@@ -30,19 +31,15 @@ export interface UserService {
 		email: string,
 	) => Promise<{ message: VerificationResult }>;
 	me: (DTO: MeDTO) => Promise<User>;
-	// updateAvatar: (userId: number, filename: string) => Promise<User>;
 	updateProfile: (
 		userId: number,
 		data: UserAndProfileUpdateDTO,
 	) => Promise<User>;
 	updatePassword: (userId: number, newPassword: string) => Promise<User>;
 	updateSignature: (userId: number, filename: string) => Promise<User>;
-	getById: (id: number) => Promise<User>;
-	// getMyAvatars: (userId: number) => Promise<Avatar[]>;
-	// deleteAvatar: (
-	// 	userId: number,
-	// 	id: number,
-	// ) => Promise<{ message: "SUCCESS" }>;
+	getFullProfileById: (
+		id: number,
+	) => Promise<ProfileWithAlbumsAndPostsAndUser>;
 }
 
 export interface UserRepository {
@@ -50,13 +47,16 @@ export interface UserRepository {
 	findByIdWithPassword: (id: number) => Promise<UserWithPassword>;
 	findById: (id: number) => Promise<User>;
 	findProfileByUserId: (userId: number) => Promise<Profile>;
-	getRequestsByUserId: (userId: number) => Promise<User[]>;
-	getFriendsByUserId: (userId: number) => Promise<User[]>;
-	getRecs: (exludeIds: number[]) => Promise<User[]>;
 	// createRequest: (userId: number, toId:number) => Promise<>
+	getFullProfileById: (
+		id: number,
+	) => Promise<ProfileWithAlbumsAndPostsAndUser>;
 	create: (data: CreateUserDTO) => Promise<User>;
 	updateUser: (userId: number, data: UserUpdate) => Promise<User>;
-	updateProfile: (userId: number, data: ProfileUpdate & UserUpdate) => Promise<User>;
+	updateProfile: (
+		userId: number,
+		data: ProfileUpdate & UserUpdate,
+	) => Promise<User>;
 	// createVerificationCode: (
 	// 	data: VerificationCodeCreate,
 	// ) => Promise<VerificationCode>;
@@ -64,10 +64,6 @@ export interface UserRepository {
 	// 	code: string,
 	// 	email: string,
 	// ) => Promise<VerificationCode>;
-	// getAvatarsByUserId: (userId: number) => Promise<Avatar[]>;
-	// uploadAvatar: (userId: number, filename: string) => Promise<User>;
-	// deleteAvatar: (id: number) => Promise<{ message: "SUCCESS" }>;
-	// findAvatarById: (id: number) => Promise<Avatar>;
 }
 
 export interface UserController {
@@ -99,23 +95,20 @@ export interface UserController {
 		res: Response<{ message: VerificationResult }>,
 		next: NextFunction,
 	) => void;
-
 	me: (
-		req: Request<object, object, object, object, AuthenticatedUser>,
+		req: Request<object, User, object, object, AuthenticatedUser>,
 		res: Response<User, AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
-
 	updateAvatar: (
-		req: Request<object, object, object, object, AuthenticatedUser>,
+		req: Request<object, User, object, object, AuthenticatedUser>,
 		res: Response<User, AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
-
 	updateProfile: (
 		req: Request<
 			object,
-			object,
+			User,
 			UserAndProfileUpdateDTO,
 			object,
 			AuthenticatedUser
@@ -123,11 +116,10 @@ export interface UserController {
 		res: Response<User, AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
-
 	updatePassword: (
 		req: Request<
 			object,
-			object,
+			User,
 			UpdatePasswordDTO,
 			object,
 			AuthenticatedUser
@@ -135,13 +127,11 @@ export interface UserController {
 		res: Response<User, AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
-
 	updateSignature: (
-		req: Request<object, object, object, object, AuthenticatedUser>,
+		req: Request<object, User, object, object, AuthenticatedUser>,
 		res: Response<User, AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
-
 	sendVerificationPasswordResetCode: (
 		req: Request<
 			object,
@@ -151,36 +141,15 @@ export interface UserController {
 		res: Response<{ message: "SUCCESS" | "NOT_EXISTS" }>,
 		next: NextFunction,
 	) => void;
-
-	getById: (
-		req: Request<{ id: string }, User>,
-		res: Response<User>,
+	getFullProfileById: (
+		req: Request<
+			{ profileId: string },
+			ProfileWithAlbumsAndPostsAndUser,
+			object,
+			object,
+			AuthenticatedUser
+		>,
+		res: Response<ProfileWithAlbumsAndPostsAndUser, AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
-
-	getFriends: (
-		req: Request<{ id: string }, User>,
-		res: Response<User>,
-		next: NextFunction,
-	) => void;
-
-
-
-	// getAvatars: (
-	// 	req: Request<object, Avatar[], object, object, AuthenticatedUser>,
-	// 	res: Response<Avatar[], AuthenticatedUser>,
-	// 	next: NextFunction,
-	// ) => void;
-
-	// deleteAvatar: (
-	// 	req: Request<
-	// 		{ id: string },
-	// 		{ message: "SUCCESS" },
-	// 		object,
-	// 		object,
-	// 		AuthenticatedUser
-	// 	>,
-	// 	res: Response<{ message: "SUCCESS" }, AuthenticatedUser>,
-	// 	next: NextFunction,
-	// ) => void;
 }

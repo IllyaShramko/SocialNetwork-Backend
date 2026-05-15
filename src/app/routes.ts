@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { UserRouter, AlbumRouter, PostRouter } from "../modules";
+import { UserRouter, AlbumRouter, PostRouter, FriendsRouter } from "../modules";
 
 export const router = Router();
 
@@ -12,3 +12,5 @@ router.use("/users/", UserRouter);
 router.use("/album/", AlbumRouter);
 
 router.use("/posts/", PostRouter);
+
+router.use("/friends/", FriendsRouter);

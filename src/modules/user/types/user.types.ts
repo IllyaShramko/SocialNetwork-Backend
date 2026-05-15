@@ -11,6 +11,21 @@ export type User = Prisma.UserGetPayload<{
 	};
 }>;
 
+export type ProfileWithAlbumsAndPostsAndUser = Prisma.ProfileGetPayload<{
+	include: {
+		user: {
+			omit: {
+				password: true;
+			};
+		};
+		albums: {
+			include: {
+				images: true;
+			};
+		};
+	};
+}>;
+
 export type Profile = Prisma.ProfileGetPayload<{}>;
 // export type VerificationCode = Prisma.VerificationCodeGetPayload<{}>;
 
@@ -39,8 +54,14 @@ export type ProfileUpdateDTO = {
 	signature?: string;
 };
 
-export type ProfileUpdate = Pick<Prisma.ProfileUpdateInput, 'pseudonym' | 'avatar' | 'birthDate'>;
-export type UserUpdate = Omit<Prisma.UserUpdateInput, 'pseudonym' | 'avatar' | 'birthDate'>;
+export type ProfileUpdate = Pick<
+	Prisma.ProfileUpdateInput,
+	"pseudonym" | "avatar" | "birthDate"
+>;
+export type UserUpdate = Omit<
+	Prisma.UserUpdateInput,
+	"pseudonym" | "avatar" | "birthDate"
+>;
 
 export type UserAndProfileUpdateDTO = UserUpdateDTO & ProfileUpdateDTO;
 

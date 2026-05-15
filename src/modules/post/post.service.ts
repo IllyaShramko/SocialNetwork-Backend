@@ -34,10 +34,11 @@ export const PostService: PostServiceContract = {
 		};
 		return finalPost;
 	},
-	async getAllPosts(page, postsPerPage, userId) {
+	async getAllPosts(page, postsPerPage, userId, targetUserId) {
 		const posts = await PostRepository.getAllPosts(
 			page * postsPerPage,
 			postsPerPage,
+			targetUserId,
 		);
 		const cleanPosts = posts.map((post) => {
 			const { hearts, likes, views, ...cleanPost } = post;

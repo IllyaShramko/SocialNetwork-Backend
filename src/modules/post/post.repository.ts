@@ -10,8 +10,13 @@ import {
 } from "@errors/app.errors";
 
 export const PostRepository: PostRepositoryContract = {
-	async getAllPosts(skip, take) {
+	async getAllPosts(skip, take, userId) {
 		const posts = await Client.post.findMany({
+			where: userId !== undefined
+				? {
+						authorId: userId,
+					}
+				: {},
 			skip: skip || 0,
 			take: take || 5,
 			include: {
