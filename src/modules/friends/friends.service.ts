@@ -5,6 +5,7 @@ export const FriendsService: FriendsServiceContract = {
 	async getRequestsByUserId(userId) {
 		const profile = await FriendsRepository.getUserProfile(userId);
 		const reqs = await FriendsRepository.getRequestsByProfileId(profile.id);
+		console.log(profile, reqs)
 		return reqs;
 	},
 	async getFriendsByUserId(userId) {
@@ -12,6 +13,7 @@ export const FriendsService: FriendsServiceContract = {
 		const friends = await FriendsRepository.getFriendsByProfileId(
 			profile.id,
 		);
+		console.log(profile, friends)
 		return friends;
 	},
 	async getRecs(userId) {
@@ -31,7 +33,7 @@ export const FriendsService: FriendsServiceContract = {
 			excludeIds.add(fromProfileId);
 			excludeIds.add(toProfileId);
 		});
-
+		
 		const recs = await FriendsRepository.getRecs([...excludeIds]);
 		return recs;
 	},
@@ -54,6 +56,7 @@ export const FriendsService: FriendsServiceContract = {
 			fromProfileId: userId,
 			toProfileId: profileId,
 		});
+		console.log(request)
 		return request;
 	},
 	async declineRequest(userId, profileId) {

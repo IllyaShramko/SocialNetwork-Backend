@@ -140,7 +140,12 @@ export const FriendsRepository: FriendsRepositoryContract = {
 	async getShortFriendsByProfileId(profileId) {
 		try {
 			const friends = await PRISMA_CLIENT.profileFriends.findMany({
-				where: { toProfileId: profileId },
+				where: {
+					OR: [
+						{ toProfileId: profileId },
+						{ fromProfileId: profileId },
+					],
+				},
 			});
 			return friends;
 		} catch (error) {
@@ -150,7 +155,12 @@ export const FriendsRepository: FriendsRepositoryContract = {
 	async getShortRequestsByProfileId(profileId) {
 		try {
 			const request = await PRISMA_CLIENT.friendsRequest.findMany({
-				where: { toProfileId: profileId },
+				where: {
+					OR: [
+						{ toProfileId: profileId },
+						{ fromProfileId: profileId },
+					],
+				},
 			});
 			return request;
 		} catch (error) {
