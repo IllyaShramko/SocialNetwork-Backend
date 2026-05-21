@@ -1,80 +1,99 @@
 import { FriendsRepository } from "./friends.repository";
 import { FriendsServiceContract } from "./types/friends.contracts";
+import { ChatService } from "../chats/chat.service";
+import { AppError, InternalServerError } from "@errors/app.errors";
 
 export const FriendsService: FriendsServiceContract = {
-	async getRequestsByUserId(userId) {
-		const profile = await FriendsRepository.getUserProfile(userId);
-		const reqs = await FriendsRepository.getRequestsByProfileId(profile.id);
-		console.log(profile, reqs)
+	async getRequestsByUserId(userId, skip, take) {
+		const reqs = await FriendsRepository.getRequestsByProfileId(
+			userId,
+			skip,
+			take,
+		);
 		return reqs;
 	},
-	async getFriendsByUserId(userId) {
-		const profile = await FriendsRepository.getUserProfile(userId);
+	async getFriendsByUserId(userId, skip, take) {
 		const friends = await FriendsRepository.getFriendsByProfileId(
-			profile.id,
+			userId,
+			skip,
+			take,
 		);
-		console.log(profile, friends)
 		return friends;
 	},
-	async getRecs(userId) {
-		const profile = await FriendsRepository.getUserProfile(userId);
+	async getRecs(userId, skip, take) {
 		const friends =
 			await FriendsRepository.getShortFriendsByProfileId(userId);
 		const reqs =
 			await FriendsRepository.getShortRequestsByProfileId(userId);
-		const excludeIds = new Set<number>([profile.id]);
+		const excludeIds = new Set<number>([userId]);
 
-		friends.forEach(({ fromProfileId, toProfileId }) => {
-			excludeIds.add(fromProfileId);
-			excludeIds.add(toProfileId);
+		friends.forEach(({ fromUserId, toUserId }) => {
+			excludeIds.add(fromUserId);
+			excludeIds.add(toUserId);
 		});
 
-		reqs.forEach(({ fromProfileId, toProfileId }) => {
-			excludeIds.add(fromProfileId);
-			excludeIds.add(toProfileId);
+		reqs.forEach(({ fromUserId, toUserId }) => {
+			excludeIds.add(fromUserId);
+			excludeIds.add(toUserId);
 		});
-		
-		const recs = await FriendsRepository.getRecs([...excludeIds]);
+
+		const recs = await FriendsRepository.getRecs(
+			[...excludeIds],
+			skip,
+			take,
+		);
 		return recs;
 	},
 	async acceptRequest(userId, profileId) {
 		const request = await FriendsRepository.getFriendRequestByIds({
-			fromProfileId: profileId,
-			toProfileId: userId,
+			fromUserId: profileId,
+			toUserId: userId,
 		});
 		const createdFriend = await FriendsRepository.createProfileFriend(
 			{
-				fromProfileId: profileId,
-				toProfileId: userId,
+				fromUserId: profileId,
+				toUserId: userId,
 			},
 			request.id,
 		);
+
+		try {
+			await ChatService.createChat(
+				{ userIds: [userId, profileId] },
+				userId,
+			);
+		} catch (error) {
+			if (error instanceof AppError) {
+				throw error;
+			}
+			throw new InternalServerError();
+		}
+
 		return createdFriend;
 	},
 	async sendRequest(userId, profileId) {
 		const request = await FriendsRepository.createFriendRequest({
-			fromProfileId: userId,
-			toProfileId: profileId,
+			fromUserId: userId,
+			toUserId: profileId,
 		});
-		console.log(request)
 		return request;
 	},
 	async declineRequest(userId, profileId) {
 		const request = await FriendsRepository.getFriendRequestByIds({
-			fromProfileId: profileId,
-			toProfileId: userId,
+			fromUserId: profileId,
+			toUserId: userId,
 		});
 		const declinedRequest = await FriendsRepository.deleteFriendRequest(
 			request.id,
 		);
 		return declinedRequest;
 	},
-	async deleteFriend(userId, profileId) {
+	async deleteFriendShip(userId, profileId) {
 		const friend = await FriendsRepository.getFriendByIds({
-			fromProfileId: profileId,
-			toProfileId: userId,
+			fromUserId: profileId,
+			toUserId: userId,
 		});
-		const deletedFriend = await FriendsRepository.deleteProfileFriend(
+		const deletedFriend = await FriendsRepository.deleteFriendShip(
 			friend.id,
 		);
 		return deletedFriend;

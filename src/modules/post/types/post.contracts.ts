@@ -1,5 +1,12 @@
 import { AuthenticatedUser } from "@app-types/token";
-import type { PostCreate, PostCreateDto, PostFullInfoDTO, PostToShow, Tag } from "./post.types";
+import type { PaginationLocals } from "@middlewares/pagination.middleware";
+import type {
+	PostCreate,
+	PostCreateDto,
+	PostFullInfoDTO,
+	PostToShow,
+	Tag,
+} from "./post.types";
 import type { Request, Response, NextFunction } from "express";
 
 export type PostRepositoryContract = {
@@ -10,11 +17,15 @@ export type PostRepositoryContract = {
 		links: string[],
 	) => Promise<PostFullInfoDTO>;
 	//
-	getUserPosts: (userId: number) => Promise<PostFullInfoDTO[]>;
+	getUserPosts: (
+		userId: number,
+		skip: number,
+		take: number,
+	) => Promise<PostFullInfoDTO[]>;
 
 	getAllPosts: (
-		skip?: number,
-		take?: number,
+		skip: number,
+		take: number,
 		userId?: number,
 	) => Promise<PostFullInfoDTO[]>;
 
@@ -24,11 +35,15 @@ export type PostRepositoryContract = {
 export type PostServiceContract = {
 	createPost: (data: PostCreateDto, userId: number) => Promise<PostToShow>;
 
-	getUserPosts: (userId: number) => Promise<PostToShow[]>;
+	getUserPosts: (
+		userId: number,
+		skip: number,
+		take: number,
+	) => Promise<PostToShow[]>;
 
 	getAllPosts: (
-		page: number,
-		postsPerPage: number,
+		skip: number,
+		take: number,
 		userId: number,
 		targetUserId?: number,
 	) => Promise<PostToShow[]>;
@@ -49,19 +64,25 @@ export type PostControllerContract = {
 		next: NextFunction,
 	) => Promise<void>;
 	getUserPosts: (
-		req: Request<object, PostToShow[], object, object, AuthenticatedUser>,
-		res: Response<PostToShow[], AuthenticatedUser>,
+		req: Request<
+			object,
+			PostToShow[],
+			object,
+			{ userId?: string; limit: string; pageNumber: string },
+			AuthenticatedUser & PaginationLocals
+		>,
+		res: Response<PostToShow[], AuthenticatedUser & PaginationLocals>,
 		next: NextFunction,
 	) => Promise<void>;
 	getAllPosts: (
 		req: Request<
-			{ pageNumber: string },
+			object,
 			PostToShow[],
 			object,
-			{ userId?: string },
-			AuthenticatedUser
+			{ userId?: string; limit: string; pageNumber: string },
+			AuthenticatedUser & PaginationLocals
 		>,
-		res: Response<PostToShow[], AuthenticatedUser>,
+		res: Response<PostToShow[], AuthenticatedUser & PaginationLocals>,
 		next: NextFunction,
 	) => Promise<void>;
 	getAllTags: (

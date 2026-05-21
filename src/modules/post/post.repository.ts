@@ -12,13 +12,14 @@ import {
 export const PostRepository: PostRepositoryContract = {
 	async getAllPosts(skip, take, userId) {
 		const posts = await Client.post.findMany({
-			where: userId !== undefined
-				? {
-						authorId: userId,
-					}
-				: {},
-			skip: skip || 0,
-			take: take || 5,
+			where:
+				userId !== undefined
+					? {
+							authorId: userId,
+						}
+					: {},
+			skip,
+			take,
 			include: {
 				images: true,
 				links: true,
@@ -57,11 +58,13 @@ export const PostRepository: PostRepositoryContract = {
 		const tags = await Client.tag.findMany();
 		return tags;
 	},
-	async getUserPosts(userId) {
+	async getUserPosts(userId, skip, take) {
 		const posts = await Client.post.findMany({
 			where: {
 				authorId: userId,
 			},
+			skip,
+			take,
 			include: {
 				images: true,
 				links: true,

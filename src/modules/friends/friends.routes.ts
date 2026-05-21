@@ -1,4 +1,5 @@
 import { authMiddleware } from "@middlewares/auth.middleware";
+import { paginationMiddleware } from "@middlewares/pagination.middleware";
 import { Router } from "express";
 import { FriendsController } from "./friends.controller";
 
@@ -14,18 +15,33 @@ FriendsRouter.delete(
 	authMiddleware,
 	FriendsController.declineRequest,
 );
-FriendsRouter.get("/req", authMiddleware, FriendsController.getRequests);
+FriendsRouter.get(
+	"/req",
+	authMiddleware,
+	paginationMiddleware,
+	FriendsController.getRequests,
+);
 
 FriendsRouter.post(
 	"/all/:profileId",
 	authMiddleware,
 	FriendsController.sendRequest,
 );
-FriendsRouter.get("/all", authMiddleware, FriendsController.getRecs);
+FriendsRouter.get(
+	"/all",
+	authMiddleware,
+	paginationMiddleware,
+	FriendsController.getRecs,
+);
 
 FriendsRouter.delete(
 	"/my/:profileId",
 	authMiddleware,
 	FriendsController.deleteFriend,
 );
-FriendsRouter.get("/my", authMiddleware, FriendsController.getFriends);
+FriendsRouter.get(
+	"/my",
+	authMiddleware,
+	paginationMiddleware,
+	FriendsController.getFriends,
+);

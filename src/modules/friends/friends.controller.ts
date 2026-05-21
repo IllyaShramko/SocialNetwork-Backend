@@ -7,6 +7,8 @@ export const FriendsController: FriendsControllerContract = {
 		try {
 			const friends = await FriendsService.getFriendsByUserId(
 				res.locals.userId,
+				res.locals.skip,
+				res.locals.take,
 			);
 			res.status(200).json(friends);
 		} catch (error) {
@@ -15,7 +17,11 @@ export const FriendsController: FriendsControllerContract = {
 	},
 	async getRecs(req, res, next) {
 		try {
-			const recs = await FriendsService.getRecs(res.locals.userId);
+			const recs = await FriendsService.getRecs(
+				res.locals.userId,
+				res.locals.skip,
+				res.locals.take,
+			);
 			res.status(200).json(recs);
 		} catch (error) {
 			next(error);
@@ -25,6 +31,8 @@ export const FriendsController: FriendsControllerContract = {
 		try {
 			const reqs = await FriendsService.getRequestsByUserId(
 				res.locals.userId,
+				res.locals.skip,
+				res.locals.take,
 			);
 			res.status(200).json(reqs);
 		} catch (error) {
@@ -62,6 +70,7 @@ export const FriendsController: FriendsControllerContract = {
 				res.locals.userId,
 				+req.params.profileId,
 			);
+			
 			res.status(201).json(request);
 		} catch (error) {
 			next(error);
@@ -94,7 +103,25 @@ export const FriendsController: FriendsControllerContract = {
 			} else {
 				throw new BadRequestError("profileId is required");
 			}
-			const friend = await FriendsService.deleteFriend(
+			const friend = await FriendsService.deleteFriendShip(
+				res.locals.userId,
+				+req.params.profileId,
+			);
+			res.status(202).json(friend);
+		} catch (error) {
+			next(error);
+		}
+	},
+	async deleteFriendShip(req, res, next) {
+		try {
+			if (req.params.profileId) {
+				if (isNaN(+req.params.profileId)) {
+					throw new BadRequestError("profileId must be integer");
+				}
+			} else {
+				throw new BadRequestError("profileId is required");
+			}
+			const friend = await FriendsService.deleteFriendShip(
 				res.locals.userId,
 				+req.params.profileId,
 			);

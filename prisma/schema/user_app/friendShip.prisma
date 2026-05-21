@@ -1,0 +1,15 @@
+model FriendShip {
+  id Int @id @default(autoincrement())
+
+  status String @default("pending") // pending | accepted
+
+  fromUser   User @relation("from_user", fields: [fromUserId], references: [id])
+  fromUserId Int  @map("from_user_id")
+
+  toUser   User @relation("to_user", fields: [toUserId], references: [id])
+  toUserId Int  @map("to_user_id")
+
+  createdAt DateTime @default(now())
+
+  @@map("user_app_friendship")
+}

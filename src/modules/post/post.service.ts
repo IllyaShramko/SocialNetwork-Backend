@@ -34,10 +34,10 @@ export const PostService: PostServiceContract = {
 		};
 		return finalPost;
 	},
-	async getAllPosts(page, postsPerPage, userId, targetUserId) {
+	async getAllPosts(skip, take, userId, targetUserId) {
 		const posts = await PostRepository.getAllPosts(
-			page * postsPerPage,
-			postsPerPage,
+			skip,
+			take,
 			targetUserId,
 		);
 		const cleanPosts = posts.map((post) => {
@@ -56,8 +56,12 @@ export const PostService: PostServiceContract = {
 		});
 		return cleanPosts;
 	},
-	async getUserPosts(userId) {
-		const posts = await PostRepository.getUserPosts(userId);
+	async getUserPosts(userId, skip, take) {
+		const posts = await PostRepository.getUserPosts(
+			userId,
+			skip,
+			take,
+		);
 		const cleanPosts = posts.map((post) => {
 			const { hearts, likes, views, ...cleanPost } = post;
 

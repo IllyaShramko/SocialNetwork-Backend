@@ -22,5 +22,8 @@ model User {
   postViews         PostView[]
   verificationCodes VerificationCode[]
 
+  friendShips         FriendShip[] @relation("from_user")
+  receivedFriendShips FriendShip[] @relation("to_user")
+
   @@map("user_app_user")
 }

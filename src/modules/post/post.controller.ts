@@ -42,8 +42,8 @@ export const PostController: PostControllerContract = {
 			}
 
 			const posts = await PostService.getAllPosts(
-				+req.params.pageNumber,
-				5,
+				res.locals.skip,
+				res.locals.take,
 				res.locals.userId,
 				targetUserId,
 			);
@@ -54,7 +54,11 @@ export const PostController: PostControllerContract = {
 	},
 	async getUserPosts(req, res, next) {
 		try {
-			const posts = await PostService.getUserPosts(res.locals.userId);
+			const posts = await PostService.getUserPosts(
+				res.locals.userId,
+				res.locals.skip,
+				res.locals.take,
+			);
 			res.status(200).json(posts);
 		} catch (error) {
 			next(error);

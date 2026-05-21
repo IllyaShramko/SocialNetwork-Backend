@@ -13,12 +13,12 @@
 
 - [Ilia Shramko](https://github.com/IllyaShramko) - Teamlead
 - [Levkovskiy Dima](https://github.com/Levkivskiydmitro) - Team Member
-- [Shmatko Dmytro](https://github.com/DimaShmatko999) - Team Member
 
 ---
 
 ## Документація про можливості API:
-
+### Тут поки  пусто...
+<!-- 
 - ### User модуль:
     1. ##### `/users/login` **Авторизація** (`POST`): Авторизація користувача за його даними.
         - В розробці
@@ -29,4 +29,4 @@
     4. ##### `/users/validate-code` **Перевірка коду** (`POST`): Перевіряє код, надісланий користувачем, на співпадання у базі та його час.
         - В розробці
     5. ##### `/users/me` **Реєстрація** (`GET`): Отримання власних даних авторизованого користувача.
-        - В розробці
+        - В розробці -->

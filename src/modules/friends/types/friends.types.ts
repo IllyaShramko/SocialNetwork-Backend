@@ -1,53 +1,47 @@
 import { Prisma } from "../../../generated/prisma";
 
-export type ProfileWithUser = Prisma.ProfileGetPayload<{
+export type UserWithProfile = Prisma.UserGetPayload<{
 	include: {
-		user: {
-			omit: {
-				password: true;
-			};
-		};
+		profile: true;
+	};
+	omit: {
+		password: true;
 	};
 }>;
 
-export type ShortFriendRequest = Prisma.FriendsRequestGetPayload<{}>;
-
-export type ShortFriendInfo = Prisma.ProfileFriendsGetPayload<{}>;
+export type ShortFriendInfo = Prisma.FriendShipGetPayload<{}>;
 
 export type Profile = Prisma.ProfileGetPayload<{}>;
 
-export type FriendRequestWithProfile = Prisma.FriendsRequestGetPayload<{
+export type FriendRequestWithProfile = Prisma.FriendShipGetPayload<{
 	include: {
-		fromProfile: {
+		fromUser: {
+			omit: {
+				password: true;
+			};
 			include: {
-				user: {
-					omit: {
-						password: true;
-					};
-				};
+				profile: true;
 			};
 		};
 	};
 }>;
 
-export type FriendWithProfile = Prisma.ProfileFriendsGetPayload<{
+export type FriendWithProfile = Prisma.FriendShipGetPayload<{
 	include: {
-		fromProfile: {
+		fromUser: {
+			omit: {
+				password: true;
+			};
 			include: {
-				user: {
-					omit: {
-						password: true;
-					};
-				};
+				profile: true;
 			};
 		};
-		toProfile: {
+		toUser: {
+			omit: {
+				password: true;
+			};
 			include: {
-				user: {
-					omit: {
-						password: true;
-					};
-				};
+				profile: true;
 			};
 		};
 	};

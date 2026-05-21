@@ -1,4 +1,5 @@
 import { authMiddleware } from "@middlewares/auth.middleware";
+import { paginationMiddleware } from "@middlewares/pagination.middleware";
 import { Router } from "express";
 import { PostController } from "./post.controller";
 import { validateMiddleware } from "@middlewares/validate.middleware";
@@ -10,8 +11,18 @@ import {
 
 export const PostRouter = Router();
 
-PostRouter.get("/", authMiddleware, PostController.getAllPosts);
-PostRouter.get("/my", authMiddleware, PostController.getUserPosts);
+PostRouter.get(
+	"/",
+	authMiddleware,
+	paginationMiddleware,
+	PostController.getAllPosts,
+);
+PostRouter.get(
+	"/my",
+	authMiddleware,
+	paginationMiddleware,
+	PostController.getUserPosts,
+);
 PostRouter.get("/tags", authMiddleware, PostController.getAllTags);
 PostRouter.post(
 	"/",

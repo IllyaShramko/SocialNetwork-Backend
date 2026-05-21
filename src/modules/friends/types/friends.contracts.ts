@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
+import type { PaginationLocals } from "@middlewares/pagination.middleware";
 import {
 	FriendRequestWithProfile,
 	FriendWithProfile,
 	Profile,
-	ProfileWithUser,
 	ShortFriendInfo,
-	ShortFriendRequest,
+	UserWithProfile,
 } from "./friends.types";
 import { AuthenticatedUser } from "@app-types/token";
 
@@ -16,9 +16,12 @@ export interface FriendsControllerContract {
 			FriendRequestWithProfile[],
 			object,
 			object,
-			AuthenticatedUser
+			AuthenticatedUser & PaginationLocals
 		>,
-		res: Response<FriendRequestWithProfile[], AuthenticatedUser>,
+		res: Response<
+			FriendRequestWithProfile[],
+			AuthenticatedUser & PaginationLocals
+		>,
 		next: NextFunction,
 	) => void;
 	getFriends: (
@@ -27,20 +30,23 @@ export interface FriendsControllerContract {
 			FriendWithProfile[],
 			object,
 			object,
-			AuthenticatedUser
+			AuthenticatedUser & PaginationLocals
 		>,
-		res: Response<FriendWithProfile[], AuthenticatedUser>,
+		res: Response<
+			FriendWithProfile[],
+			AuthenticatedUser & PaginationLocals
+		>,
 		next: NextFunction,
 	) => void;
 	getRecs: (
 		req: Request<
 			object,
-			ProfileWithUser[],
+			UserWithProfile[],
 			object,
 			object,
-			AuthenticatedUser
+			AuthenticatedUser & PaginationLocals
 		>,
-		res: Response<ProfileWithUser[], AuthenticatedUser>,
+		res: Response<UserWithProfile[], AuthenticatedUser & PaginationLocals>,
 		next: NextFunction,
 	) => void;
 
@@ -58,26 +64,37 @@ export interface FriendsControllerContract {
 	sendRequest: (
 		req: Request<
 			{ profileId: string },
-			ShortFriendRequest,
+			ShortFriendInfo,
 			object,
 			object,
 			AuthenticatedUser
 		>,
-		res: Response<ShortFriendRequest, AuthenticatedUser>,
+		res: Response<ShortFriendInfo, AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
 	declineRequest: (
 		req: Request<
 			{ profileId: string },
-			ShortFriendRequest,
+			ShortFriendInfo,
 			object,
 			object,
 			AuthenticatedUser
 		>,
-		res: Response<ShortFriendRequest, AuthenticatedUser>,
+		res: Response<ShortFriendInfo, AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
 	deleteFriend: (
+		req: Request<
+			{ profileId: string },
+			ShortFriendInfo,
+			object,
+			object,
+			AuthenticatedUser
+		>,
+		res: Response<ShortFriendInfo, AuthenticatedUser>,
+		next: NextFunction,
+	) => void;
+	deleteFriendShip: (
 		req: Request<
 			{ profileId: string },
 			ShortFriendInfo,
@@ -93,9 +110,19 @@ export interface FriendsControllerContract {
 export interface FriendsServiceContract {
 	getRequestsByUserId: (
 		userId: number,
+		skip: number,
+		take: number,
 	) => Promise<FriendRequestWithProfile[]>;
-	getFriendsByUserId: (userId: number) => Promise<FriendWithProfile[]>;
-	getRecs: (userId: number) => Promise<ProfileWithUser[]>;
+	getFriendsByUserId: (
+		userId: number,
+		skip: number,
+		take: number,
+	) => Promise<FriendWithProfile[]>;
+	getRecs: (
+		userId: number,
+		skip: number,
+		take: number,
+	) => Promise<UserWithProfile[]>;
 
 	acceptRequest: (
 		userId: number,
@@ -104,12 +131,12 @@ export interface FriendsServiceContract {
 	sendRequest: (
 		userId: number,
 		profileId: number,
-	) => Promise<ShortFriendRequest>;
+	) => Promise<ShortFriendInfo>;
 	declineRequest: (
 		userId: number,
 		profileId: number,
-	) => Promise<ShortFriendRequest>;
-	deleteFriend: (
+	) => Promise<ShortFriendInfo>;
+	deleteFriendShip: (
 		userId: number,
 		profileId: number,
 	) => Promise<ShortFriendInfo>;
@@ -118,36 +145,44 @@ export interface FriendsServiceContract {
 export interface FriendsRepositoryContract {
 	getShortRequestsByProfileId: (
 		profileId: number,
-	) => Promise<ShortFriendRequest[]>;
+	) => Promise<ShortFriendInfo[]>;
 	getShortFriendsByProfileId: (
 		profileId: number,
 	) => Promise<ShortFriendInfo[]>;
 	getRequestsByProfileId: (
 		profileId: number,
+		skip: number,
+		take: number,
 	) => Promise<FriendRequestWithProfile[]>;
-	getFriendsByProfileId: (profileId: number) => Promise<FriendWithProfile[]>;
-	getRecs: (exludeIds: number[]) => Promise<ProfileWithUser[]>;
+	getFriendsByProfileId: (
+		profileId: number,
+		skip: number,
+		take: number,
+	) => Promise<FriendWithProfile[]>;
+	getRecs: (
+		exludeIds: number[],
+		skip: number,
+		take: number,
+	) => Promise<UserWithProfile[]>;
 	getFriendRequestByIds: (data: {
-		fromProfileId: number;
-		toProfileId: number;
-	}) => Promise<ShortFriendRequest>;
-	getFriendByIds: (data: {
-		fromProfileId: number;
-		toProfileId: number;
+		fromUserId: number;
+		toUserId: number;
 	}) => Promise<ShortFriendInfo>;
-	getUserProfile: (userId: number) => Promise<Profile>;
-
+	getFriendByIds: (data: {
+		fromUserId: number;
+		toUserId: number;
+	}) => Promise<ShortFriendInfo>;
 	createFriendRequest: (data: {
-		fromProfileId: number;
-		toProfileId: number;
-	}) => Promise<ShortFriendRequest>;
+		fromUserId: number;
+		toUserId: number;
+	}) => Promise<ShortFriendInfo>;
 	createProfileFriend: (
 		data: {
-			fromProfileId: number;
-			toProfileId: number;
+			fromUserId: number;
+			toUserId: number;
 		},
 		idRequest: number,
 	) => Promise<ShortFriendInfo>;
-	deleteProfileFriend: (id: number) => Promise<ShortFriendInfo>;
-	deleteFriendRequest: (id: number) => Promise<ShortFriendRequest>;
+	deleteFriendShip: (id: number) => Promise<ShortFriendInfo>;
+	deleteFriendRequest: (id: number) => Promise<ShortFriendInfo>;
 }
