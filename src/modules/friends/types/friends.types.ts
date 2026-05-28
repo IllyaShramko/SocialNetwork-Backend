@@ -1,13 +1,13 @@
 import { Prisma } from "../../../generated/prisma";
 
-export type ProfileWithUser = Prisma.ProfileGetPayload<{
-	include: {
-		user: {
-			omit: {
-				password: true;
-			};
-		};
-	};
+
+export type UserWithProfile = Prisma.UserGetPayload<{
+  include: {
+    profile: true;
+  };
+  omit: {
+    password: true;
+  };
 }>;
 
 export type ShortFriendRequest = Prisma.FriendsRequestGetPayload<{}>;

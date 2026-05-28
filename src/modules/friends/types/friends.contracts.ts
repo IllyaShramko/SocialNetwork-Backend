@@ -3,9 +3,9 @@ import {
 	FriendRequestWithProfile,
 	FriendWithProfile,
 	Profile,
-	ProfileWithUser,
 	ShortFriendInfo,
 	ShortFriendRequest,
+	UserWithProfile,
 } from "./friends.types";
 import { AuthenticatedUser } from "@app-types/token";
 
@@ -35,12 +35,12 @@ export interface FriendsControllerContract {
 	getRecs: (
 		req: Request<
 			object,
-			ProfileWithUser[],
+			UserWithProfile[],
 			object,
 			object,
 			AuthenticatedUser
 		>,
-		res: Response<ProfileWithUser[], AuthenticatedUser>,
+		res: Response<UserWithProfile[], AuthenticatedUser>,
 		next: NextFunction,
 	) => void;
 
@@ -95,7 +95,7 @@ export interface FriendsServiceContract {
 		userId: number,
 	) => Promise<FriendRequestWithProfile[]>;
 	getFriendsByUserId: (userId: number) => Promise<FriendWithProfile[]>;
-	getRecs: (userId: number) => Promise<ProfileWithUser[]>;
+	getRecs: (userId: number) => Promise<UserWithProfile[]>;
 
 	acceptRequest: (
 		userId: number,
@@ -126,7 +126,7 @@ export interface FriendsRepositoryContract {
 		profileId: number,
 	) => Promise<FriendRequestWithProfile[]>;
 	getFriendsByProfileId: (profileId: number) => Promise<FriendWithProfile[]>;
-	getRecs: (exludeIds: number[]) => Promise<ProfileWithUser[]>;
+	getRecs: (exludeIds: number[]) => Promise<UserWithProfile[]>;
 	getFriendRequestByIds: (data: {
 		fromProfileId: number;
 		toProfileId: number;

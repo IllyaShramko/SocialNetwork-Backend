@@ -64,18 +64,14 @@ export const FriendsRepository: FriendsRepositoryContract = {
 	},
 	async getRecs(excludeIds) {
 		try {
-			const profiles = await PRISMA_CLIENT.profile.findMany({
+			const profiles = await PRISMA_CLIENT.user.findMany({
 				where: {
 					id: {
 						notIn: excludeIds,
 					},
 				},
 				include: {
-					user: {
-						omit: {
-							password: true,
-						},
-					},
+					profile: true,
 				},
 			});
 			return profiles;
