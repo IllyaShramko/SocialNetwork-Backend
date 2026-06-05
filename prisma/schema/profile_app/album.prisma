@@ -1,15 +1,15 @@
 model Album {
   id        Int          @id @default(autoincrement())
-  name      String
-  theme     String
-  year      Int
-  createdAt DateTime     @default(now()) @map("created_at")
+  name      String       @db.VarChar(100)
+  theme     String?      @db.VarChar(50)
+  year      Int?
   isShown   Boolean      @map("is_shown")
   isDefault Boolean      @map("is_default")
+  createdAt DateTime     @map("created_at") @db.Timestamptz(6)
+  profileId Int          @map("profile_id")
+  profile   Profile      @relation(fields: [profileId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "profile_app_album_profile_id_7414a460_fk_profile_app_profile_id")
   images    AlbumImage[]
 
-  profile   Profile @relation(fields: [profileId], references: [id])
-  profileId Int     @map("profile_id")
-
+  @@index([profileId], map: "profile_app_album_profile_id_7414a460")
   @@map("profile_app_album")
 }

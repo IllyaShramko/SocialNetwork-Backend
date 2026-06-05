@@ -90,47 +90,23 @@ export const UserRepository: RepoContract = {
 			throw new InternalServerError();
 		}
 	},
-	// async createVerificationCode({ email, code, expiresAt }) {
-	// 	const codeDB = await Client.verificationCode.create({
-	// 		data: {
-	// 			email,
-	// 			code,
-	// 			expiresAt,
-	// 		},
-	// 	});
-	// 	return codeDB;
-	// },
-	// async findVerificationByCode(code, email) {
-	// 	try {
-	// 		const verification = await Client.verificationCode.findFirstOrThrow(
-	// 			{
-	// 				where: { AND: [{ code: code }, { email: email }] },
-	// 			},
-	// 		);
-	// 		return verification;
-	// 	} catch (error) {
-	// 		if (error instanceof PrismaClientKnownRequestError) {
-	// 			switch (error.code) {
-	// 				case PrismaErrorCodes.NOT_EXIST:
-	// 					throw new NotFoundError("Verification code");
-	// 				default:
-	// 					throw new InternalServerError();
-	// 			}
-	// 		}
-	// 		if (error instanceof Error) {
-	// 			throw new InternalServerError(error.message);
-	// 		}
-	// 		throw new InternalServerError();
-	// 	}
-	// },
 	async create(data) {
 		try {
 			const user = await Client.user.create({
 				data: {
 					...data,
 					profile: {
-						create: {},
+						create: {
+							is_image_signature: true,
+							is_text_signature: true
+						},
 					},
+					firstName: "",
+					lastName: "",
+					isSuperuser: false,
+					isStaff: false,
+					isActive: true,
+					dateJoined: new Date(),
 				},
 				omit: {
 					password: true,

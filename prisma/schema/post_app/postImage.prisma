@@ -1,9 +1,10 @@
 model PostImage {
-  id             Int    @id @default(autoincrement())
-  originalImage  String @map("original_image")
-  comressedImage String @map("comressed_image")
-  post           Post   @relation(fields: [postId], references: [id])
-  postId         Int    @map("post_id")
+  id               Int    @id @default(autoincrement())
+  postId           Int    @map("post_id")
+  compressedImage String @map("compressed_image") @db.VarChar(100)
+  originalImage    String @map("original_image") @db.VarChar(100)
+  post             Post   @relation(fields: [postId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "post_app_postimage_post_id_f96e8718_fk_post_app_post_id")
 
+  @@index([postId], map: "post_app_postimage_post_id_f96e8718")
   @@map("post_app_postimage")
 }

@@ -5,26 +5,26 @@ import { FriendsController } from "./friends.controller";
 export const FriendsRouter = Router();
 
 FriendsRouter.post(
-	"/req/:profileId",
+	"/req/:userId",
 	authMiddleware,
 	FriendsController.acceptRequest,
 );
 FriendsRouter.delete(
-	"/req/:profileId",
+	"/req/:userId",
 	authMiddleware,
 	FriendsController.declineRequest,
 );
 FriendsRouter.get("/req", authMiddleware, FriendsController.getRequests);
 
 FriendsRouter.post(
-	"/all/:profileId",
+	"/all/:userId",
 	authMiddleware,
 	FriendsController.sendRequest,
 );
 FriendsRouter.get("/all", authMiddleware, FriendsController.getRecs);
 
 FriendsRouter.delete(
-	"/my/:profileId",
+	"/my/:userId",
 	authMiddleware,
 	FriendsController.deleteFriend,
 );

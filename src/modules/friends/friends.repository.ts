@@ -3,20 +3,17 @@ import { FriendsRepositoryContract } from "./types/friends.contracts";
 import { PRISMA_CLIENT } from "@config/client";
 
 export const FriendsRepository: FriendsRepositoryContract = {
-	async getRequestsByProfileId(profileId) {
+	async getRequestsByUserId(userId) {
 		try {
-			const requests = await PRISMA_CLIENT.friendsRequest.findMany({
-				where: {
-					toProfileId: profileId,
-				},
+			const requests = await PRISMA_CLIENT.friendShip.findMany({
+				where: { toUserId: userId, status: "pending" },
 				include: {
-					fromProfile: {
+					fromUser: {
 						include: {
-							user: {
-								omit: {
-									password: true,
-								},
-							},
+							profile: true,
+						},
+						omit: {
+							password: true,
 						},
 					},
 				},
@@ -26,32 +23,28 @@ export const FriendsRepository: FriendsRepositoryContract = {
 			throw new InternalServerError();
 		}
 	},
-	async getFriendsByProfileId(profileId) {
+	async getFriendsByUserId(userId) {
 		try {
-			const friends = await PRISMA_CLIENT.profileFriends.findMany({
+			const friends = await PRISMA_CLIENT.friendShip.findMany({
 				where: {
-					OR: [
-						{ fromProfileId: profileId },
-						{ toProfileId: profileId },
-					],
+					OR: [{ fromUserId: userId }, { toUserId: userId }],
+					status: "accepted",
 				},
 				include: {
-					fromProfile: {
+					fromUser: {
 						include: {
-							user: {
-								omit: {
-									password: true,
-								},
-							},
+							profile: true,
+						},
+						omit: {
+							password: true,
 						},
 					},
-					toProfile: {
+					toUser: {
 						include: {
-							user: {
-								omit: {
-									password: true,
-								},
-							},
+							profile: true,
+						},
+						omit: {
+							password: true,
 						},
 					},
 				},
@@ -81,22 +74,18 @@ export const FriendsRepository: FriendsRepositoryContract = {
 	},
 	async getFriendByIds(data) {
 		try {
-			const friend = await PRISMA_CLIENT.profileFriends.findFirstOrThrow({
+			const friend = await PRISMA_CLIENT.friendShip.findFirstOrThrow({
 				where: {
 					OR: [
 						data,
 						{
-							toProfileId: data.fromProfileId,
-							fromProfileId: data.toProfileId,
+							toUserId: data.fromUserId,
+							fromUserId: data.toUserId,
 						},
 					],
+					status: "accepted",
 				},
 			});
-			// if (!friend) {
-			// 	throw new NotFoundError(
-			// 		`friend with fromProfile with id ${data.fromProfileId} or toProfile with id ${data.toProfileId}`,
-			// 	);
-			// }
 			return friend;
 		} catch (error) {
 			if (error instanceof NotFoundError) {
@@ -107,24 +96,18 @@ export const FriendsRepository: FriendsRepositoryContract = {
 	},
 	async getFriendRequestByIds(data) {
 		try {
-			const request = await PRISMA_CLIENT.friendsRequest.findFirstOrThrow(
-				{
-					where: {
-						OR: [
-							data,
-							{
-								toProfileId: data.fromProfileId,
-								fromProfileId: data.toProfileId,
-							},
-						],
-					},
+			const request = await PRISMA_CLIENT.friendShip.findFirstOrThrow({
+				where: {
+					OR: [
+						data,
+						{
+							toUserId: data.fromUserId,
+							fromUserId: data.toUserId,
+						},
+					],
+					status: "pending",
 				},
-			);
-			// if (!request) {
-			// 	throw new NotFoundError(
-			// 		`request with fromProfile with id ${data.fromProfileId} or toProfile with id ${data.toProfileId}`,
-			// 	);
-			// }
+			});
 			return request;
 		} catch (error) {
 			if (error instanceof NotFoundError) {
@@ -133,14 +116,11 @@ export const FriendsRepository: FriendsRepositoryContract = {
 			throw new InternalServerError();
 		}
 	},
-	async getShortFriendsByProfileId(profileId) {
+	async getShortFriendsByUserId(userId) {
 		try {
-			const friends = await PRISMA_CLIENT.profileFriends.findMany({
+			const friends = await PRISMA_CLIENT.friendShip.findMany({
 				where: {
-					OR: [
-						{ toProfileId: profileId },
-						{ fromProfileId: profileId },
-					],
+					OR: [{ toUserId: userId }, {}],
 				},
 			});
 			return friends;
@@ -148,14 +128,11 @@ export const FriendsRepository: FriendsRepositoryContract = {
 			throw new InternalServerError();
 		}
 	},
-	async getShortRequestsByProfileId(profileId) {
+	async getShortRequestsByUserId(userId) {
 		try {
-			const request = await PRISMA_CLIENT.friendsRequest.findMany({
+			const request = await PRISMA_CLIENT.friendShip.findMany({
 				where: {
-					OR: [
-						{ toProfileId: profileId },
-						{ fromProfileId: profileId },
-					],
+					OR: [{ toUserId: userId }, { fromUserId: userId }],
 				},
 			});
 			return request;
@@ -165,32 +142,32 @@ export const FriendsRepository: FriendsRepositoryContract = {
 	},
 	async createFriendRequest(data) {
 		try {
-			const request = await PRISMA_CLIENT.friendsRequest.create({
-				data,
+			const request = await PRISMA_CLIENT.friendShip.create({
+				data: { ...data, status: "pending", created_at: new Date() },
 			});
 			return request;
 		} catch (error) {
 			throw new InternalServerError();
 		}
 	},
-	async createProfileFriend(data, idRequest) {
+	async updateStatusFriend(data) {
 		try {
-			const [request, friend] = await PRISMA_CLIENT.$transaction([
-				PRISMA_CLIENT.friendsRequest.delete({
-					where: { id: idRequest },
-				}),
-				PRISMA_CLIENT.profileFriends.create({
-					data,
-				}),
-			]);
+			const friend = await PRISMA_CLIENT.friendShip.update({
+				where: {
+					id: data.id,
+				},
+				data: {
+					status: data.status,
+				},
+			});
 			return friend;
-		} catch (error) {
+		} catch {
 			throw new InternalServerError();
 		}
 	},
 	async deleteFriendRequest(id) {
 		try {
-			const request = await PRISMA_CLIENT.friendsRequest.delete({
+			const request = await PRISMA_CLIENT.friendShip.delete({
 				where: { id },
 			});
 			return request;
@@ -200,7 +177,7 @@ export const FriendsRepository: FriendsRepositoryContract = {
 	},
 	async deleteProfileFriend(id) {
 		try {
-			const friend = await PRISMA_CLIENT.profileFriends.delete({
+			const friend = await PRISMA_CLIENT.friendShip.delete({
 				where: { id },
 			});
 			return friend;

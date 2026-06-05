@@ -3,76 +3,65 @@ import { FriendsServiceContract } from "./types/friends.contracts";
 
 export const FriendsService: FriendsServiceContract = {
 	async getRequestsByUserId(userId) {
-		const profile = await FriendsRepository.getUserProfile(userId);
-		const reqs = await FriendsRepository.getRequestsByProfileId(profile.id);
-		console.log(profile, reqs)
+		const reqs = await FriendsRepository.getRequestsByUserId(userId);
 		return reqs;
 	},
 	async getFriendsByUserId(userId) {
-		const profile = await FriendsRepository.getUserProfile(userId);
-		const friends = await FriendsRepository.getFriendsByProfileId(
-			profile.id,
-		);
-		console.log(profile, friends)
+		const friends = await FriendsRepository.getFriendsByUserId(userId);
 		return friends;
 	},
 	async getRecs(userId) {
 		const profile = await FriendsRepository.getUserProfile(userId);
-		const friends =
-			await FriendsRepository.getShortFriendsByProfileId(userId);
-		const reqs =
-			await FriendsRepository.getShortRequestsByProfileId(userId);
+		const friends = await FriendsRepository.getShortFriendsByUserId(userId);
+		const reqs = await FriendsRepository.getShortRequestsByUserId(userId);
 		const excludeIds = new Set<number>([profile.id]);
 
-		friends.forEach(({ fromProfileId, toProfileId }) => {
-			excludeIds.add(fromProfileId);
-			excludeIds.add(toProfileId);
+		friends.forEach(({ fromUserId, toUserId }) => {
+			excludeIds.add(fromUserId);
+			excludeIds.add(toUserId);
 		});
 
-		reqs.forEach(({ fromProfileId, toProfileId }) => {
-			excludeIds.add(fromProfileId);
-			excludeIds.add(toProfileId);
+		reqs.forEach(({ fromUserId, toUserId }) => {
+			excludeIds.add(fromUserId);
+			excludeIds.add(toUserId);
 		});
-		
+
 		const recs = await FriendsRepository.getRecs([...excludeIds]);
 		return recs;
 	},
-	async acceptRequest(userId, profileId) {
+	async acceptRequest(userId, userId1) {
 		const request = await FriendsRepository.getFriendRequestByIds({
-			fromProfileId: profileId,
-			toProfileId: userId,
+			fromUserId: userId1,
+			toUserId: userId,
 		});
-		const createdFriend = await FriendsRepository.createProfileFriend(
-			{
-				fromProfileId: profileId,
-				toProfileId: userId,
-			},
-			request.id,
-		);
-		return createdFriend;
+		const createFriend = await FriendsRepository.updateStatusFriend({
+			id: request.id,
+			status: "accepted",
+		});
+		return createFriend;
 	},
-	async sendRequest(userId, profileId) {
+	async sendRequest(userId, UserId) {
 		const request = await FriendsRepository.createFriendRequest({
-			fromProfileId: userId,
-			toProfileId: profileId,
+			fromUserId: userId,
+			toUserId: UserId,
 		});
-		console.log(request)
+		console.log(request);
 		return request;
 	},
-	async declineRequest(userId, profileId) {
+	async declineRequest(userId, UserId) {
 		const request = await FriendsRepository.getFriendRequestByIds({
-			fromProfileId: profileId,
-			toProfileId: userId,
+			fromUserId: UserId,
+			toUserId: userId,
 		});
 		const declinedRequest = await FriendsRepository.deleteFriendRequest(
 			request.id,
 		);
 		return declinedRequest;
 	},
-	async deleteFriend(userId, profileId) {
+	async deleteFriend(userId, UserId) {
 		const friend = await FriendsRepository.getFriendByIds({
-			fromProfileId: profileId,
-			toProfileId: userId,
+			fromUserId: UserId,
+			toUserId: userId,
 		});
 		const deletedFriend = await FriendsRepository.deleteProfileFriend(
 			friend.id,

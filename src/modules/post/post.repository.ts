@@ -12,11 +12,12 @@ import {
 export const PostRepository: PostRepositoryContract = {
 	async getAllPosts(skip, take, userId) {
 		const posts = await Client.post.findMany({
-			where: userId !== undefined
-				? {
-						authorId: userId,
-					}
-				: {},
+			where:
+				userId !== undefined
+					? {
+							authorId: userId,
+						}
+					: {},
 			skip: skip || 0,
 			take: take || 5,
 			include: {
@@ -114,9 +115,10 @@ export const PostRepository: PostRepositoryContract = {
 					images: {
 						create: images.map((filename) => ({
 							originalImage: filename,
-							comressedImage: filename,
+							compressedImage: filename,
 						})),
 					},
+					createdAt: new Date(),
 				},
 				include: {
 					tags: {

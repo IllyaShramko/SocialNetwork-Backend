@@ -56,7 +56,7 @@ export type ProfileUpdateDTO = {
 
 export type ProfileUpdate = Pick<
 	Prisma.ProfileUpdateInput,
-	"pseudonym" | "avatar" | "birthDate"
+	"pseudonym" | "avatar" | "birthDate" | "signature"
 >;
 export type UserUpdate = Omit<
 	Prisma.UserUpdateInput,
@@ -80,18 +80,6 @@ export type VerificationResult = "SUCCESS" | "NOT_CORRECT" | "EXPIRED";
 
 export type CodeType = "PASSWORD_RESET" | "EMAIL_VERIFICATION";
 
-export type FriendRequest = Prisma.FriendsRequestGetPayload<{
-	include: {
-		toProfile: true;
-	};
-}>;
-
-export type Friend = Prisma.ProfileFriendsGetPayload<{
-	include: {
-		toProfile: true;
-		fromProfile: true;
-	};
-}>;
 
 // export type ProfileWithPosts
 
