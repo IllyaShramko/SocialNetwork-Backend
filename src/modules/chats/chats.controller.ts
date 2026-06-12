@@ -1,40 +1,62 @@
+import { ChatService } from "./chats.service";
 import { ChatControllerContract } from "./types/chats.contracts";
 
 export const ChatController: ChatControllerContract = {
-	createChat: function (req, res, next) {
-        try {
+	async createChat(req, res, next) {
+		try {
+			const chat = await ChatService.createChat(
+				req.body,
+				res.locals.userId,
+			);
 
-        }
-        catch (error) {
-            next(error);
-        }
-        throw new Error("Function not implemented.");
+			res.status(201).json(chat);
+		} catch (error) {
+			next(error);
+		}
 	},
-	getUserGroupChats: function (req, res, next) {
-        try {
-            
-        }
-        catch (error) {
-            next(error);
-        }
-        throw new Error("Function not implemented.");
+
+	async getUserGroupChats(req, res, next) {
+		try {
+			const chats = await ChatService.getUserGroupChats(
+				res.locals.userId,
+				{
+					skip: 0,
+					take: 20,
+				},
+			);
+
+			res.status(200).json(chats);
+		} catch (error) {
+			next(error);
+		}
 	},
-	getUserDirectChats: function (req, res, next) {
-        try {
-            
-        }
-        catch (error) {
-            next(error);
-        }
-        throw new Error("Function not implemented.");
+
+	async getUserDirectChats(req, res, next) {
+		try {
+			const chats = await ChatService.getUserDirectChats(
+				res.locals.userId,
+				{
+					skip: 0,
+					take: 20,
+				},
+			);
+
+			res.status(200).json(chats);
+		} catch (error) {
+			next(error);
+		}
 	},
-	getChatById: function (req, res, next) {
-        try {
-            
-        }
-        catch (error) {
-            next(error);
-        }
-        throw new Error("Function not implemented.");
+
+	async getChatById(req, res, next) {
+		try {
+			const chat = await ChatService.getChatById(
+				Number(req.params.chatId),
+				res.locals.userId,
+			);
+
+			res.status(200).json(chat);
+		} catch (error) {
+			next(error);
+		}
 	},
 };

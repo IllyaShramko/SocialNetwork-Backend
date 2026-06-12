@@ -1,25 +1,90 @@
+import { ChatRepository } from "./chats.repository";
 import { ChatServiceContract } from "./types/chats.contracts";
 
 export const ChatService: ChatServiceContract = {
-	createChat: function (data, userId) {
-		throw new Error("Function not implemented.");
+	async createChat(data, userId) {
+		if (data.userIds.length === 1) {
+			const existingChat = await ChatRepository.findPersonalChat(
+				userId,
+				data.userIds[0],
+			);
+
+			if (existingChat) {
+				return existingChat;
+			}
+		}
+
+		return await ChatRepository.createChat({
+			name: data.name ?? null,
+			avatar: data.avatar ?? "",
+			isGroup: data.userIds.length > 1,
+			adminId: data.userIds.length > 1 ? userId : null,
+			userIds: [...new Set([userId, ...data.userIds])],
+		});
 	},
-	getUserGroupChats: function (userId, pagination) {
-		throw new Error("Function not implemented.");
+
+	async getUserGroupChats(userId, pagination) {
+		return await ChatRepository.getUserGroupChats(
+			userId,
+			pagination,
+		);
 	},
-	getUserDirectChats: function (userId, pagination) {
-		throw new Error("Function not implemented.");
+
+	async getUserDirectChats(userId, pagination) {
+		const chats = await ChatRepository.getUserDirectChats(
+			userId,
+			pagination,
+		);
+
+		return chats.map((chat) => {
+			const participant = chat.users.find(
+				(user) => user.userId !== userId,
+			)!;
+
+			return {
+				...chat,
+				participant,
+			};
+		});
 	},
-	getChatById: function (chatId, userId) {
-		throw new Error("Function not implemented.");
+
+	async getChatById(chatId, userId) {
+		return await ChatRepository.getChatById(chatId, userId);
 	},
-	searchUsers: function (query, currentUserId) {
-		throw new Error("Function not implemented.");
+
+	async searchUsers(query, currentUserId) {
+		return await ChatRepository.searchUsers(
+			query,
+			currentUserId,
+		);
 	},
-	isChatParticipant: function (chatId, userId) {
-		throw new Error("Function not implemented.");
+
+	async isChatParticipant(chatId, userId) {
+		try {
+			const chat = await ChatRepository.getChatById(
+				chatId,
+				userId,
+			);
+
+			return chat.users.some(
+				(user) => user.userId === userId,
+			);
+		} catch {
+			return false;
+		}
 	},
-	getChatByUserIds: function (userId, targetUserId) {
-		throw new Error("Function not implemented.");
+
+	async getChatByUserIds(userId, targetUserId) {
+		const chat = await ChatRepository.findPersonalChat(
+			userId,
+			targetUserId,
+		);
+
+		if (!chat) {
+			throw new Error("Chat not found");
+		}
+
+		return chat;
 	},
 };
+// asda
