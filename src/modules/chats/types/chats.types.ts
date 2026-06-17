@@ -101,7 +101,7 @@ export type ChatGroupWithPreview = Prisma.ChatGetPayload<{
 		};
 	};
 }> & {
-	unreadCount: number;
+	unreadCount?: number;
 };
 
 export type ChatWithUsers = Prisma.ChatGetPayload<{

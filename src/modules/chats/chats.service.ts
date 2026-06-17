@@ -4,13 +4,17 @@ import { ChatServiceContract } from "./types/chats.contracts";
 export const ChatService: ChatServiceContract = {
 	async createChat(data, userId) {
 		if (data.userIds.length === 1) {
-			const existingChat = await ChatRepository.findPersonalChat(
-				userId,
-				data.userIds[0],
-			);
+			const targetUserId = data.userIds[0];
 
-			if (existingChat) {
-				return existingChat;
+			if (targetUserId !== undefined) {
+				const existingChat = await ChatRepository.findPersonalChat(
+					userId,
+					targetUserId,
+				);
+
+				if (existingChat) {
+					return existingChat;
+				}
 			}
 		}
 
@@ -18,7 +22,7 @@ export const ChatService: ChatServiceContract = {
 			name: data.name ?? null,
 			avatar: data.avatar ?? "",
 			isGroup: data.userIds.length > 1,
-			adminId: data.userIds.length > 1 ? userId : null,
+			adminId: data.userIds.length >= 1 ? userId : null,
 			userIds: [...new Set([userId, ...data.userIds])],
 		});
 	},

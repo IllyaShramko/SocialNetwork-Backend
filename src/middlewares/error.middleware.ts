@@ -8,6 +8,7 @@ export function errorMiddleware(
 	res: Response,
 	next: NextFunction,
 ) {
+	console.log(error);
 	if (error instanceof AppError) {
 		res.status(error.statusCode).json({
 			status: "error",

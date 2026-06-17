@@ -6,9 +6,46 @@ export const ChatRepository: ChatRepositoryContract = {
 	async createChat(data) {
 		try {
 			return await PRISMA_CLIENT.chat.create({
-				data,
+				data: {
+					name: data.name,
+					avatar: data.avatar,
+					isGroup: data.isGroup,
+					...(data.adminId
+						? {
+								admin: {
+									connect: {
+										id: data.adminId,
+									},
+								},
+							}
+						: {}),
+					users: {
+						create: data.userIds.map((userId) => ({
+							user: {
+								connect: {
+									id: userId,
+								},
+							},
+						})),
+					},
+				},
+				include: {
+					users: {
+						include: {
+							user: {
+								omit: {
+									password: true,
+								},
+								include: {
+									profile: true,
+								},
+							},
+						},
+					},
+				},
 			});
-		} catch {
+		} catch (error) {
+			console.error("Error creating chat", error);
 			throw new InternalServerError();
 		}
 	},
@@ -17,10 +54,24 @@ export const ChatRepository: ChatRepositoryContract = {
 		try {
 			return await PRISMA_CLIENT.chat.findFirst({
 				where: {
-					participants: {
+					users: {
 						every: {
 							userId: {
 								in: [currentUserId, targetUserId],
+							},
+						},
+					},
+				},
+				include: {
+					users: {
+						include: {
+							user: {
+								omit: {
+									password: true,
+								},
+								include: {
+									profile: true,
+								},
 							},
 						},
 					},
@@ -50,10 +101,10 @@ export const ChatRepository: ChatRepositoryContract = {
 
 	async getUserGroupChats(userId, pagination) {
 		try {
-			return await PRISMA_CLIENT.chat.findMany({
+			const chats = await PRISMA_CLIENT.chat.findMany({
 				where: {
-					type: "GROUP",
-					participants: {
+					isGroup: true,
+					users: {
 						some: {
 							userId,
 						},
@@ -61,25 +112,76 @@ export const ChatRepository: ChatRepositoryContract = {
 				},
 				skip: pagination.skip,
 				take: pagination.take,
+				include: {
+					messages: {
+						include: {
+							sender: {
+								omit: {
+									password: true,
+								},
+								include: {
+									profile: true,
+								},
+							},
+							messageImages: true,
+							messageReaders: true,
+						},
+					},
+				},
 			});
-		} catch {
+			return chats.map((chat) => {
+				return { ...chat, unreadCount: 0 };
+			});
+		} catch (error) {
+			console.error(error);
 			throw new InternalServerError();
 		}
 	},
 
 	async getUserDirectChats(userId, pagination) {
 		try {
-			return await PRISMA_CLIENT.chat.findMany({
+			const chats = await PRISMA_CLIENT.chat.findMany({
 				where: {
-					type: "DIRECT",
-					participants: {
+					isGroup: false,
+					users: {
 						some: {
 							userId,
 						},
 					},
 				},
+				include: {
+					messages: {
+						include: {
+							sender: {
+								omit: {
+									password: true,
+								},
+								include: {
+									profile: true,
+								},
+							},
+							messageImages: true,
+							messageReaders: true,
+						},
+					},
+					users: {
+						include: {
+							user: {
+								omit: {
+									password: true,
+								},
+								include: {
+									profile: true,
+								},
+							},
+						},
+					},
+				},
 				skip: pagination.skip,
 				take: pagination.take,
+			});
+			return chats.map((chat) => {
+				return { ...chat, unreadCount: 0 };
 			});
 		} catch {
 			throw new InternalServerError();
@@ -91,14 +193,14 @@ export const ChatRepository: ChatRepositoryContract = {
 			return await PRISMA_CLIENT.chat.findFirstOrThrow({
 				where: {
 					id: chatId,
-					participants: {
+					users: {
 						some: {
 							userId,
 						},
 					},
 				},
 				include: {
-					participants: {
+					users: {
 						include: {
 							user: {
 								include: {
@@ -121,6 +223,20 @@ export const ChatRepository: ChatRepositoryContract = {
 		try {
 			return await PRISMA_CLIENT.chat.delete({
 				where: { id },
+				include: {
+					users: {
+						include: {
+							user: {
+								omit: {
+									password: true,
+								},
+								include: {
+									profile: true,
+								},
+							},
+						},
+					},
+				},
 			});
 		} catch {
 			throw new InternalServerError();
@@ -142,7 +258,7 @@ export const ChatRepository: ChatRepositoryContract = {
 							},
 						},
 						{
-							profile: {
+							user: {
 								firstName: {
 									contains: query,
 									mode: "insensitive",
